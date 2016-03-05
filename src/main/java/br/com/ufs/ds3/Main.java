@@ -16,8 +16,16 @@ public class Main {
 	private static void loadDatabase() {
 		try (Connection con = DB.getConnection()) {
 			Statement st = con.createStatement();
-			Scanner scanner = new Scanner(Main.class.getResourceAsStream("/initial_data.sql"));
+			Scanner scanner = new Scanner(Main.class.getResourceAsStream("/initial_tables.sql"));
 			StringBuilder sql = new StringBuilder();
+			while (scanner.hasNextLine()) {
+				sql.append(scanner.nextLine());
+			}
+			scanner.close();
+			st.execute(sql.toString());
+			
+			scanner = new Scanner(Main.class.getResourceAsStream("/initial_data.sql"));
+			sql = new StringBuilder();
 			while (scanner.hasNextLine()) {
 				sql.append(scanner.nextLine());
 			}
