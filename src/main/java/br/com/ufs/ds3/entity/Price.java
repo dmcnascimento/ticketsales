@@ -1,12 +1,13 @@
 package br.com.ufs.ds3.entity;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 public class Price {
 	private Integer id;
 	private WeekDay weekDay;
 	private Date start;
-	private Double ticketPrice;
+	private BigDecimal ticketPrice;
 	private Event event;
 	
 	public Integer getId() {
@@ -33,11 +34,11 @@ public class Price {
 		this.start = start;
 	}
 	
-	public Double getTicketPrice() {
+	public BigDecimal getTicketPrice() {
 		return ticketPrice;
 	}
 	
-	public void setTicketPrice(Double ticketPrice) {
+	public void setTicketPrice(BigDecimal ticketPrice) {
 		this.ticketPrice = ticketPrice;
 	}
 	

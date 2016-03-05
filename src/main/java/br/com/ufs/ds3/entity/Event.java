@@ -6,6 +6,7 @@ public class Event {
 	private String title;
 	private String description;
 	private Integer duration;
+	private Theatre theatre;
 
 	public Integer getId() {
 		return id;
@@ -45,5 +46,13 @@ public class Event {
 
 	public void setDuration(Integer duration) {
 		this.duration = duration;
+	}
+
+	public Theatre getTheatre() {
+		return theatre;
+	}
+
+	public void setTheatre(Theatre theatre) {
+		this.theatre = theatre;
 	}
 }
