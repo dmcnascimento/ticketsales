@@ -14,11 +14,15 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.AbstractTableModel;
 
+import br.com.ufs.ds3.dao.ChairDao;
 import br.com.ufs.ds3.dao.EventDao;
+import br.com.ufs.ds3.dao.PriceDao;
 import br.com.ufs.ds3.dao.SessionDao;
+import br.com.ufs.ds3.entity.Chair;
 import br.com.ufs.ds3.entity.Event;
 import br.com.ufs.ds3.entity.Session;
 import br.com.ufs.ds3.entity.Ticket;
@@ -38,16 +42,44 @@ public class TicketPanel {
 		ticketPanel.add(eventCombo, "growx");
 		
 		JLabel sessionLabel = new JLabel("Sessão");
-		JComboBox<Session> sessionCombo = new JComboBox<>(new SessionDao().listSessionsFromEvent((Event) eventCombo.getSelectedItem()).toArray(new Session[]{}));
+		JComboBox<Session> sessionCombo = new JComboBox<>();
 		ticketPanel.add(sessionLabel);
 		ticketPanel.add(sessionCombo, "growx, wrap");
 		
 		eventCombo.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
-				sessionCombo.removeAllItems();
-				for (Session session : new SessionDao().listSessionsFromEvent((Event) eventCombo.getSelectedItem())) {
-					sessionCombo.addItem(session);
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					sessionCombo.removeAllItems();
+					for (Session session : new SessionDao().listSessionsFromEvent((Event) eventCombo.getSelectedItem())) {
+						sessionCombo.addItem(session);
+					}
+				}
+			}
+		});
+		
+		JLabel chairLabel = new JLabel("Cadeira");
+		JComboBox<Chair> chairCombo = new JComboBox<>();
+		ticketPanel.add(chairLabel);
+		ticketPanel.add(chairCombo, "wrap");
+		
+		JLabel priceLabel = new JLabel("Preço");
+		JTextField priceField = new JTextField();
+		ticketPanel.add(priceLabel);
+		ticketPanel.add(priceField, "wrap, width 75:75:");
+		
+		sessionCombo.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					Session session = (Session) sessionCombo.getSelectedItem();
+					List<Chair> availableChairs = new ChairDao().listAvailableChairsForSession(session);
+					chairCombo.removeAllItems();
+					for (Chair chair : availableChairs) {
+						chairCombo.addItem(chair);
+					}
+					
+					priceField.setText(new PriceDao().getPriceForSession(session).getTicketPrice().toString());
 				}
 			}
 		});
