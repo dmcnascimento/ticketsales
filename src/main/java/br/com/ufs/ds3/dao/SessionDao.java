@@ -12,8 +12,18 @@ import br.com.ufs.ds3.entity.Session;
 import br.com.ufs.ds3.entity.Theatre;
 
 public class SessionDao {
+	private DB db;
+	
+	public SessionDao() {
+		this.db = new DB();
+	}
+	
+	public SessionDao(DB db) {
+		this.db = db;
+	}
+	
 	public void persist(Session session) {
-		EntityManager entityManager = DB.createEntityManager();
+		EntityManager entityManager = db.createEntityManager();
 		entityManager.getTransaction().begin();
 		entityManager.persist(session);
 		entityManager.getTransaction().commit();
@@ -21,7 +31,7 @@ public class SessionDao {
 	}
 	
 	public Session update(Session session) {
-		EntityManager entityManager = DB.createEntityManager();
+		EntityManager entityManager = db.createEntityManager();
 		entityManager.getTransaction().begin();
 		session = entityManager.merge(session);
 		entityManager.getTransaction().commit();
@@ -30,7 +40,7 @@ public class SessionDao {
 	}
 	
 	public void remove(Session session) {
-		EntityManager entityManager = DB.createEntityManager();
+		EntityManager entityManager = db.createEntityManager();
 		entityManager.getTransaction().begin();
 		entityManager.remove(session);
 		entityManager.getTransaction().commit();
@@ -38,7 +48,7 @@ public class SessionDao {
 	}
 	
 	public List<Session> listSessions() {
-		EntityManager entityManager = DB.createEntityManager();
+		EntityManager entityManager = db.createEntityManager();
 		List<Session> sessions = entityManager.createQuery("select o from Session o order by o.day, o.event.title", Session.class)
 				.getResultList();
 		entityManager.close();
@@ -46,7 +56,7 @@ public class SessionDao {
 	}
 	
 	public List<Session> listSessionsFromEvent(Event event) {
-		EntityManager entityManager = DB.createEntityManager();
+		EntityManager entityManager = db.createEntityManager();
 		List<Session> sessions = entityManager.createQuery("select o from Session o where o.event = :event order by o.day, o.startHour", Session.class)
 				.setParameter("event", event).getResultList();
 		entityManager.close();
@@ -54,7 +64,7 @@ public class SessionDao {
 	}
 	
 	public boolean sessionExistsAtTheatre(Theatre theatre, Date day, Date startHour, Date endHour) {
-		EntityManager entityManager = DB.createEntityManager();
+		EntityManager entityManager = db.createEntityManager();
 		Calendar c = Calendar.getInstance();
 		c.setTime(endHour);
 		c.add(Calendar.MINUTE, 30);

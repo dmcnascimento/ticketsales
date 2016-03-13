@@ -10,8 +10,18 @@ import br.com.ufs.ds3.entity.Session;
 import br.com.ufs.ds3.entity.WeekDay;
 
 public class PriceDao {
+	private DB db;
+	
+	public PriceDao() {
+		this.db = new DB();
+	}
+	
+	public PriceDao(DB db) {
+		this.db = db;
+	}
+	
 	public Price getPriceForSession(Session session) {
-		EntityManager entityManager = DB.createEntityManager();
+		EntityManager entityManager = db.createEntityManager();
 		List<Price> price = entityManager.createQuery("select o from Price o where o.event = :event and "
 				+ "o.weekDay = :weekday and o.startHour <= :startHour order by o.startHour desc", Price.class)
 			.setParameter("event", session.getEvent()).setParameter("weekday", WeekDay.fromDate(session.getDay()))

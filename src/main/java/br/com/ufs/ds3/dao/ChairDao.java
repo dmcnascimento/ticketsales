@@ -10,8 +10,18 @@ import br.com.ufs.ds3.entity.ChairCondition;
 import br.com.ufs.ds3.entity.Session;
 
 public class ChairDao {
+	private DB db;
+	
+	public ChairDao() {
+		this.db = new DB();
+	}
+	
+	public ChairDao(DB db) {
+		this.db = db;
+	}
+	
 	public List<Chair> listAvailableChairsForSession(Session session) {
-		EntityManager entityManager = DB.createEntityManager();
+		EntityManager entityManager = db.createEntityManager();
 		List<Chair> chairs = entityManager.createQuery(
 			"select o from Chair o "
 			+ "where o.theatre = :theatre and o.chairCondition = :chairCondition "

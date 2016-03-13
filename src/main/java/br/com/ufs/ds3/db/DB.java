@@ -8,10 +8,10 @@ import br.com.ufs.ds3.entity.Chair;
 import br.com.ufs.ds3.entity.ChairCondition;
 import br.com.ufs.ds3.entity.Theatre;
 
-public final class DB {
+public class DB {
 	private static EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("ticketsalesPU");;
-	
-	static {
+
+	public DB() {
 		EntityManager entityManager = createEntityManager();
 		if (entityManager.createQuery("select 1 from Theatre").setMaxResults(1).getResultList().isEmpty()) {
 			Theatre theatre = new Theatre();
@@ -55,7 +55,7 @@ public final class DB {
 		entityManager.close();
 	}
 	
-	public static EntityManager createEntityManager() {
+	public EntityManager createEntityManager() {
 		return entityManagerFactory.createEntityManager();
 	}
 }

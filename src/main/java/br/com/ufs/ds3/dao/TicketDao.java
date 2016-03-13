@@ -16,8 +16,18 @@ import br.com.ufs.ds3.entity.Ticket;
 
 public class TicketDao {
 
+	private DB db;
+	
+	public TicketDao() {
+		this.db = new DB();
+	}
+	
+	public TicketDao(DB db) {
+		this.db = db;
+	}
+	
 	public List<Ticket> listTickets(Theatre theatre, Event event, Session session, Integer number) {
-		EntityManager entityManager = DB.createEntityManager();
+		EntityManager entityManager = db.createEntityManager();
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Ticket> query = cb.createQuery(Ticket.class);
 		Root<Ticket> ticket = query.from(Ticket.class);
@@ -45,7 +55,7 @@ public class TicketDao {
 	}
 	
 	public void persist(Ticket ticket) {
-		EntityManager entityManager = DB.createEntityManager();
+		EntityManager entityManager = db.createEntityManager();
 		entityManager.getTransaction().begin();
 		entityManager.persist(ticket);
 		entityManager.getTransaction().commit();
@@ -53,7 +63,7 @@ public class TicketDao {
 	}
 	
 	public Ticket update(Ticket ticket) {
-		EntityManager entityManager = DB.createEntityManager();
+		EntityManager entityManager = db.createEntityManager();
 		entityManager.getTransaction().begin();
 		ticket = entityManager.merge(ticket);
 		entityManager.getTransaction().commit();
