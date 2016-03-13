@@ -19,18 +19,21 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.table.AbstractTableModel;
 
 import br.com.ufs.ds3.dao.EventDao;
-import br.com.ufs.ds3.dao.SessionDao;
 import br.com.ufs.ds3.entity.Event;
 import br.com.ufs.ds3.entity.Rating;
+import br.com.ufs.ds3.exception.TicketSalesException;
 import br.com.ufs.ds3.gui.main.ContentPanelInfo;
 import br.com.ufs.ds3.gui.main.ContentPanelInfo.ContentPanel;
 import br.com.ufs.ds3.gui.main.TicketSales;
+import br.com.ufs.ds3.service.EventService;
 import net.miginfocom.swing.MigLayout;
 
 public class EventPanel {
 	public static final String EDIT_EVENT = "editEvent";
 
 	public static JPanel createEventFormPanel(Event baseEvent) {
+		EventService eventService = new EventService();
+		
 		JPanel eventPanel = new JPanel(new MigLayout());
 		JLabel titleLabel = new JLabel("Título");
 		JTextField titleField = new JTextField();
@@ -65,14 +68,17 @@ public class EventPanel {
 				event.setTheatre(TicketSales.INSTANCE.getCurrentTheatre());
 				event.setDuration((Integer) durationSpinner.getValue());
 				
-				if (event.getId() == null) {
-					new EventDao().persist(event);
-				} else {
-					new EventDao().update(event);
+				try {
+					if (event.getId() == null) {
+						eventService.persist(event);
+					} else {
+						eventService.update(event);
+					}
+					JOptionPane.showMessageDialog(null, "Registro gravado com sucesso");
+					TicketSales.INSTANCE.changePanel(new ContentPanelInfo(ContentPanel.CREATE_EVENT));
+				} catch (TicketSalesException ex) {
+					JOptionPane.showMessageDialog(null, ex.getMessage());
 				}
-				
-				JOptionPane.showMessageDialog(null, "Registro gravado com sucesso");
-				TicketSales.INSTANCE.changePanel(new ContentPanelInfo(ContentPanel.CREATE_EVENT));
 			}
 		});
 		

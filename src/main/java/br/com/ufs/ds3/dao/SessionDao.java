@@ -1,5 +1,7 @@
 package br.com.ufs.ds3.dao;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -7,6 +9,7 @@ import javax.persistence.EntityManager;
 import br.com.ufs.ds3.db.DB;
 import br.com.ufs.ds3.entity.Event;
 import br.com.ufs.ds3.entity.Session;
+import br.com.ufs.ds3.entity.Theatre;
 
 public class SessionDao {
 	public void persist(Session session) {
@@ -48,5 +51,17 @@ public class SessionDao {
 				.setParameter("event", event).getResultList();
 		entityManager.close();
 		return sessions;
+	}
+	
+	public boolean sessionExistsAtTheatre(Theatre theatre, Date day, Date startHour, Date endHour) {
+		EntityManager entityManager = DB.createEntityManager();
+		Calendar c = Calendar.getInstance();
+		c.setTime(endHour);
+		c.add(Calendar.MINUTE, 30);
+		endHour = c.getTime();
+		return !entityManager.createQuery("select 1 from Session o where o.event.theatre = :theatre and o.day = :day and "
+				+ "((o.startHour between :startHour and :endHour) or (o.endHour between :startHour and :endHour))")
+			.setParameter("theatre", theatre).setParameter("day", day).setParameter("startHour", startHour).setParameter("endHour", endHour)
+			.setMaxResults(1).getResultList().isEmpty();
 	}
 }
