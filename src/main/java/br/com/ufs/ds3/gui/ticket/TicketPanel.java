@@ -22,6 +22,7 @@ import br.com.ufs.ds3.dao.ChairDao;
 import br.com.ufs.ds3.dao.EventDao;
 import br.com.ufs.ds3.dao.PriceDao;
 import br.com.ufs.ds3.dao.SessionDao;
+import br.com.ufs.ds3.dao.TicketDao;
 import br.com.ufs.ds3.entity.Chair;
 import br.com.ufs.ds3.entity.Event;
 import br.com.ufs.ds3.entity.Session;
@@ -90,6 +91,7 @@ public class TicketPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Ticket ticket = new Ticket();
+				ticket.setSession((Session) sessionCombo.getSelectedItem());
 				
 				JOptionPane.showMessageDialog(null, "Registro gravado com sucesso");
 				TicketSales.INSTANCE.changePanel(new ContentPanelInfo(ContentPanel.CREATE_TICKET));
@@ -100,15 +102,60 @@ public class TicketPanel {
 	}
 	
 	public static JPanel createListTicketPanel() {
-		JPanel sessionPanel = new JPanel(new MigLayout());
-		SessionTableModel sessionTableModel = new SessionTableModel(new SessionDao().listSessions());
-		JTable sessionTable = new JTable(sessionTableModel);
-		sessionTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		JScrollPane scrollPane = new JScrollPane(sessionTable);
-		sessionPanel.add(scrollPane, "span, grow, wrap, width 700:700:");
+		JPanel ticketPanel = new JPanel(new MigLayout());
 		
-		JButton edit = new JButton("Editar");
-		sessionPanel.add(edit);
+		JLabel eventLabel = new JLabel("Evento");
+		JComboBox<Event> eventCombo = new JComboBox<>(new EventDao().listEventsFromTheatre(TicketSales.INSTANCE.getCurrentTheatre()).toArray(new Event[]{}));
+		ticketPanel.add(eventLabel);
+		ticketPanel.add(eventCombo, "growx");
+		
+		JLabel sessionLabel = new JLabel("Sessão");
+		JComboBox<Session> sessionCombo = new JComboBox<>();
+		ticketPanel.add(sessionLabel);
+		ticketPanel.add(sessionCombo, "growx");
+		
+		eventCombo.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					sessionCombo.removeAllItems();
+					for (Session session : new SessionDao().listSessionsFromEvent((Event) eventCombo.getSelectedItem())) {
+						sessionCombo.addItem(session);
+					}
+				}
+			}
+		});
+		
+		JLabel numberLabel = new JLabel("Número");
+		JTextField numberField = new JTextField();
+		ticketPanel.add(numberLabel);
+		ticketPanel.add(numberField, "growx, width 75:75:");
+		
+		TicketTableModel ticketTableModel = new TicketTableModel();
+		JTable ticketTable = new JTable(ticketTableModel);
+		ticketTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		JScrollPane scrollPane = new JScrollPane(ticketTable);
+		
+		JButton searchButton = new JButton("Buscar");
+		ticketPanel.add(searchButton, "wrap");
+		searchButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ticketTableModel.setEvent((Event) eventCombo.getSelectedItem());
+				ticketTableModel.setSession((Session) sessionCombo.getSelectedItem());
+				if (numberField.getText() != null && numberField.getText().trim().equals("")) {
+					ticketTableModel.setNumber(null);
+				} else {
+					ticketTableModel.setNumber(Integer.valueOf(numberField.getText()));
+				}
+				ticketTableModel.refresh();
+			}
+		});
+		
+		ticketPanel.add(scrollPane, "span, grow, wrap, width 700:700:");
+		
+		JButton edit = new JButton("Visualizar");
+		ticketPanel.add(edit);
 		edit.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -117,29 +164,34 @@ public class TicketPanel {
 			}
 		});
 		
-		return sessionPanel;
+		return ticketPanel;
 	}
 }
 
-class SessionTableModel extends AbstractTableModel {
+class TicketTableModel extends AbstractTableModel {
 	private static final long serialVersionUID = 1L;
-	private static final String[] COLUMNS = {"Evento", "Dia", "Hora Início", "Hora Fim"};
+	private static final String[] COLUMNS = {"Evento", "Número", "Dia", "Hora Início", "Hora Fim"};
 	
-	private List<Session> sessions;
+	private List<Ticket> tickets;
 	private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 	private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
+	private TicketDao ticketDao;
+	private Event event;
+	private Session session;
+	private Integer number;
 
-	public SessionTableModel(List<Session> sessions) {
-		this.sessions = sessions;
+	public TicketTableModel() {
+		ticketDao = new TicketDao();
+		this.tickets = ticketDao.listTickets(TicketSales.INSTANCE.getCurrentTheatre(), null, null, null);
 	}
 	
-	public Session getSessionAt(int selectedRow) {
-		return sessions.get(selectedRow);
+	public Ticket getSessionAt(int selectedRow) {
+		return tickets.get(selectedRow);
 	}
 
 	@Override
 	public int getRowCount() {
-		return sessions.size();
+		return tickets.size();
 	}
 
 	@Override
@@ -149,15 +201,17 @@ class SessionTableModel extends AbstractTableModel {
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
-		Session session = sessions.get(rowIndex);
+		Ticket ticket = tickets.get(rowIndex);
 		if (columnIndex == 0) {
-			return session.getEvent().getTitle();
+			return ticket.getSession().getEvent().getTitle();
 		} else if (columnIndex == 1) {
-			return dateFormat.format(session.getDay());
+			return ticket.getNumber();
 		} else if (columnIndex == 2) {
-			return timeFormat.format(session.getStartHour());
+			return dateFormat.format(ticket.getSession().getDay());
 		} else if (columnIndex == 3) {
-			return timeFormat.format(session.getEndHour());
+			return timeFormat.format(ticket.getSession().getStartHour());
+		} else if (columnIndex == 4) {
+			return timeFormat.format(ticket.getSession().getEndHour());
 		}
 		return null;
 	}
@@ -165,5 +219,33 @@ class SessionTableModel extends AbstractTableModel {
 	@Override
 	public String getColumnName(int column) {
 		return COLUMNS[column];
+	}
+	
+	public void refresh() {
+		tickets = ticketDao.listTickets(TicketSales.INSTANCE.getCurrentTheatre(), event, session, number);
+	}
+	
+	public Session getSession() {
+		return session;
+	}
+	
+	public void setSession(Session session) {
+		this.session = session;
+	}
+	
+	public Event getEvent() {
+		return event;
+	}
+	
+	public void setEvent(Event event) {
+		this.event = event;
+	}
+	
+	public Integer getNumber() {
+		return number;
+	}
+	
+	public void setNumber(Integer number) {
+		this.number = number;
 	}
 }

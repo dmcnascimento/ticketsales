@@ -1,13 +1,13 @@
 package br.com.ufs.ds3.entity;
 
-import java.math.BigDecimal;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -18,15 +18,28 @@ public class Ticket {
 	@Column
 	private Integer id;
 	
-	@OneToOne(optional = false, fetch = FetchType.EAGER)
-	@JoinColumn(nullable = false)
-	private ChairSession chairSession;
-	
 	@Column(nullable = false)
 	private Integer number;
 	
-	@Column(nullable = false, columnDefinition = "NUMERIC(10,2)")
-	private BigDecimal paidValue;
+	@ManyToOne(fetch = FetchType.EAGER, optional = false)
+	@JoinColumn(nullable = false)
+	private Price price;
+	
+	@ManyToOne(optional = false, fetch = FetchType.EAGER)
+	@JoinColumn(nullable = false)
+	private Chair chair;
+	
+	@ManyToOne(optional = false, fetch = FetchType.EAGER)
+	@JoinColumn(nullable = false)
+	private Session session;
+	
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private ChairStatus chairStatus;
+	
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private TicketType ticketType;
 
 	public Integer getId() {
 		return id;
@@ -44,19 +57,43 @@ public class Ticket {
 		this.number = number;
 	}
 
-	public BigDecimal getPaidValue() {
-		return paidValue;
+	public Price getPrice() {
+		return price;
 	}
 
-	public void setPaidValue(BigDecimal paidValue) {
-		this.paidValue = paidValue;
+	public void setPrice(Price price) {
+		this.price = price;
 	}
-	
-	public ChairSession getChairSession() {
-		return chairSession;
+
+	public Chair getChair() {
+		return chair;
 	}
-	
-	public void setChairSession(ChairSession chairSession) {
-		this.chairSession = chairSession;
+
+	public void setChair(Chair chair) {
+		this.chair = chair;
+	}
+
+	public Session getSession() {
+		return session;
+	}
+
+	public void setSession(Session session) {
+		this.session = session;
+	}
+
+	public ChairStatus getChairStatus() {
+		return chairStatus;
+	}
+
+	public void setChairStatus(ChairStatus chairStatus) {
+		this.chairStatus = chairStatus;
+	}
+
+	public TicketType getTicketType() {
+		return ticketType;
+	}
+
+	public void setTicketType(TicketType ticketType) {
+		this.ticketType = ticketType;
 	}
 }

@@ -26,6 +26,14 @@ public class SessionDao {
 		return session;
 	}
 	
+	public void remove(Session session) {
+		EntityManager entityManager = DB.createEntityManager();
+		entityManager.getTransaction().begin();
+		entityManager.remove(session);
+		entityManager.getTransaction().commit();
+		entityManager.close();
+	}
+	
 	public List<Session> listSessions() {
 		EntityManager entityManager = DB.createEntityManager();
 		List<Session> sessions = entityManager.createQuery("select o from Session o order by o.day, o.event.title", Session.class)

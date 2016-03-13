@@ -19,6 +19,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.table.AbstractTableModel;
 
 import br.com.ufs.ds3.dao.EventDao;
+import br.com.ufs.ds3.dao.SessionDao;
 import br.com.ufs.ds3.entity.Event;
 import br.com.ufs.ds3.entity.Rating;
 import br.com.ufs.ds3.gui.main.ContentPanelInfo;
@@ -78,8 +79,18 @@ public class EventPanel {
 		if (baseEvent != null) {
 			titleField.setText(baseEvent.getTitle());
 			descriptionField.setText(baseEvent.getDescription());
-			ratingCombo.setSelectedItem(baseEvent.getRating());;
+			ratingCombo.setSelectedItem(baseEvent.getRating());
 			durationSpinner.setValue(baseEvent.getDuration());
+			
+			JButton removeButton = new JButton("Remover");
+			removeButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					new EventDao().remove(baseEvent);
+					JOptionPane.showMessageDialog(null, "Registro removido com sucesso");
+					TicketSales.INSTANCE.changePanel(new ContentPanelInfo(ContentPanel.CREATE_EVENT));
+				}
+			});
 		}
 		
 		return eventPanel;

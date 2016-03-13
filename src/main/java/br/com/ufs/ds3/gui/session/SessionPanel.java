@@ -43,6 +43,12 @@ public class SessionPanel {
 
 	public static JPanel createSessionFormPanel(Session baseSession) {
 		JPanel sessionPanel = new JPanel(new MigLayout());
+		
+		JLabel eventLabel = new JLabel("Evento");
+		JComboBox<Event> eventCombo = new JComboBox<>(new EventDao().listEventsFromTheatre(TicketSales.INSTANCE.getCurrentTheatre()).toArray(new Event[]{}));
+		sessionPanel.add(eventLabel);
+		sessionPanel.add(eventCombo, "growx, wrap");
+		
 		JLabel dayLabel = new JLabel("Dia");
 		DateModel<Date> dateModel = new UtilDateModel();
 		Properties datei18n = new Properties();
@@ -83,11 +89,6 @@ public class SessionPanel {
 		spinnerEndHour.setEditor(editorEndHour);
 		sessionPanel.add(spinnerEndHour, "wrap");
 		
-		JLabel eventLabel = new JLabel("Evento");
-		JComboBox<Event> eventCombo = new JComboBox<>(new EventDao().listEventsFromTheatre(TicketSales.INSTANCE.getCurrentTheatre()).toArray(new Event[]{}));
-		sessionPanel.add(eventLabel);
-		sessionPanel.add(eventCombo, "growx, wrap");
-		
 		JButton persistButton = new JButton("Gravar");
 		sessionPanel.add(persistButton, "x2 (container.w+pref)/2");
 		persistButton.addActionListener(new ActionListener() {
@@ -115,6 +116,16 @@ public class SessionPanel {
 			eventCombo.setSelectedItem(baseSession.getEvent());
 			spinnerStartHourModel.setValue(baseSession.getStartHour());
 			spinnerEndHourModel.setValue(baseSession.getEndHour());
+			
+			JButton removeButton = new JButton("Remover");
+			removeButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					new SessionDao().remove(baseSession);
+					JOptionPane.showMessageDialog(null, "Registro removido com sucesso");
+					TicketSales.INSTANCE.changePanel(new ContentPanelInfo(ContentPanel.CREATE_SESSION));
+				}
+			});
 		}
 		
 		return sessionPanel;

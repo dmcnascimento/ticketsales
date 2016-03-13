@@ -40,4 +40,12 @@ public class EventDao {
 		entityManager.close();
 		return event;
 	}
+	
+	public void remove(Event event) {
+		EntityManager entityManager = DB.createEntityManager();
+		entityManager.getTransaction().begin();
+		entityManager.remove(event);
+		entityManager.getTransaction().commit();
+		entityManager.close();
+	}
 }
