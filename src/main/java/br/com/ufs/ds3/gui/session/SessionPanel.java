@@ -2,12 +2,10 @@ package br.com.ufs.ds3.gui.session;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -22,20 +20,18 @@ import javax.swing.SpinnerDateModel;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.text.DateFormatter;
 
-import org.jdatepicker.DateModel;
-import org.jdatepicker.impl.DateComponentFormatter;
-import org.jdatepicker.impl.JDatePanelImpl;
-import org.jdatepicker.impl.JDatePickerImpl;
-import org.jdatepicker.impl.UtilDateModel;
-
+import br.com.ufs.ds3.bean.SessionModelBean;
 import br.com.ufs.ds3.dao.EventDao;
 import br.com.ufs.ds3.dao.SessionDao;
 import br.com.ufs.ds3.entity.Event;
 import br.com.ufs.ds3.entity.Session;
+import br.com.ufs.ds3.entity.SessionType;
+import br.com.ufs.ds3.entity.WeekDay;
 import br.com.ufs.ds3.exception.TicketSalesException;
 import br.com.ufs.ds3.gui.main.ContentPanelInfo;
 import br.com.ufs.ds3.gui.main.ContentPanelInfo.ContentPanel;
 import br.com.ufs.ds3.gui.main.TicketSales;
+import br.com.ufs.ds3.service.SessionService;
 import net.miginfocom.swing.MigLayout;
 
 public class SessionPanel {
@@ -50,17 +46,9 @@ public class SessionPanel {
 		sessionPanel.add(eventCombo, "growx, wrap");
 		
 		JLabel dayLabel = new JLabel("Dia");
-		DateModel<Date> dateModel = new UtilDateModel();
-		Properties datei18n = new Properties();
-		try {
-			datei18n.load(SessionPanel.class.getResourceAsStream("/org/jdatepicker/i18n/Text_pt.properties"));
-		} catch (IOException e) {
-			throw new TicketSalesException(e);
-		}
-		JDatePanelImpl datePanel = new JDatePanelImpl(dateModel, datei18n);
-		JDatePickerImpl dayField = new JDatePickerImpl(datePanel, new DateComponentFormatter());
+		JComboBox<WeekDay> dayCombo = new JComboBox<>(WeekDay.values());
 		sessionPanel.add(dayLabel);
-		sessionPanel.add(dayField);
+		sessionPanel.add(dayCombo);
 		
 		Calendar initialHour = Calendar.getInstance();
 		initialHour.set(1970, 0, 1, 0, 0, 0);
@@ -75,33 +63,39 @@ public class SessionPanel {
 		formatter.setAllowsInvalid(false);
 		formatter.setOverwriteMode(true);
 		spinnerStartHour.setEditor(editorStartHour);
-		sessionPanel.add(spinnerStartHour, "wrap");
+		sessionPanel.add(spinnerStartHour);
+		
+		JLabel sessionTypeLabel = new JLabel("Tipo de Sessão");
+		JComboBox<SessionType> sessionTypeCombo = new JComboBox<>(SessionType.values());
+		sessionPanel.add(sessionTypeLabel);
+		sessionPanel.add(sessionTypeCombo, "wrap");
 		
 		JButton persistButton = new JButton("Gravar");
 		sessionPanel.add(persistButton, "x2 (container.w+pref)/2");
 		persistButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Session session = baseSession == null ? new Session() : baseSession;
-				session.setDay(dateModel.getValue());
-				session.setStartHour(spinnerStartHourModel.getDate());
-				session.setEvent((Event) eventCombo.getSelectedItem());
+				Event event = (Event) eventCombo.getSelectedItem();
+				WeekDay day = (WeekDay) dayCombo.getSelectedItem();
+				Date startHour = (Date) spinnerStartHour.getValue();
+				SessionType sessionType = (SessionType) sessionTypeCombo.getSelectedItem();
+				SessionModelBean sessionModelBean = new SessionModelBean(event, day, startHour, sessionType);
 				
-				if (session.getId() == null) {
-					new SessionDao().persist(session);
-				} else {
-					new SessionDao().update(session);
+				try {
+					new SessionService().createSessions(sessionModelBean);
+					JOptionPane.showMessageDialog(null, "Registro gravado com sucesso");
+					TicketSales.INSTANCE.changePanel(new ContentPanelInfo(ContentPanel.CREATE_SESSION));
+				} catch (TicketSalesException ex) {
+					JOptionPane.showMessageDialog(null, ex.getMessage());
 				}
-				
-				JOptionPane.showMessageDialog(null, "Registro gravado com sucesso");
-				TicketSales.INSTANCE.changePanel(new ContentPanelInfo(ContentPanel.CREATE_SESSION));
 			}
 		});
 		
 		if (baseSession != null) {
-			dateModel.setValue(baseSession.getDay());
 			eventCombo.setSelectedItem(baseSession.getEvent());
-			spinnerStartHourModel.setValue(baseSession.getStartHour());
+			dayCombo.setSelectedItem(WeekDay.fromDate(baseSession.getDay()));
+			spinnerStartHour.setValue(baseSession.getStartHour());
+			sessionTypeCombo.setSelectedItem(SessionType.fromClass(baseSession.getClass()));
 			
 			JButton removeButton = new JButton("Remover");
 			removeButton.addActionListener(new ActionListener() {

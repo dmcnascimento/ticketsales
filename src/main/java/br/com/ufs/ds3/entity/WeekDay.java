@@ -4,7 +4,18 @@ import java.util.Calendar;
 import java.util.Date;
 
 public enum WeekDay {
-	SUN, MON, TUE, WED, THU, FRI, SAT;
+	SUN("Domingo"), MON("Segunda"), TUE("Terça"), WED("Quarta"), THU("Quinta"), FRI("Sexta"), SAT("Sábado");
+	
+	private String label;
+	
+	private WeekDay(String label) {
+		this.label = label;
+	}
+	
+	@Override
+	public String toString() {
+		return label;
+	}
 	
 	public static WeekDay fromDate(Date day) {
 		Calendar calendar = Calendar.getInstance();

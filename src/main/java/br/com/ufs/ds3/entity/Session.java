@@ -18,7 +18,7 @@ import javax.persistence.TemporalType;
 
 @Entity
 @Table
-public class Session {
+public abstract class Session {
 	
 	@Id
 	@SequenceGenerator(name = "SessionGenerator")
@@ -37,7 +37,7 @@ public class Session {
 	@ManyToOne(optional = false, fetch = FetchType.EAGER)
 	@JoinColumn(nullable = false)
 	private Event event;
-
+	
 	public Integer getId() {
 		return id;
 	}
