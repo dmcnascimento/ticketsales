@@ -1,5 +1,7 @@
 package br.com.ufs.ds3.entity;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -12,6 +14,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 @Entity
 @Table
@@ -39,6 +43,17 @@ public class Event {
 	@ManyToOne(fetch = FetchType.EAGER, optional = false)
 	@JoinColumn(nullable = false)
 	private Theatre theatre;
+	
+	@Column(nullable = false)
+	private Integer intervalDuration;
+	
+	@Column(nullable = false)
+	@Temporal(TemporalType.DATE)
+	private Date startDate;
+	
+	@Column(nullable = false)
+	@Temporal(TemporalType.DATE)
+	private Date endDate;
 
 	public Integer getId() {
 		return id;
@@ -46,6 +61,30 @@ public class Event {
 
 	public void setId(Integer id) {
 		this.id = id;
+	}
+
+	public Integer getIntervalDuration() {
+		return intervalDuration;
+	}
+
+	public void setIntervalDuration(Integer intervalDuration) {
+		this.intervalDuration = intervalDuration;
+	}
+
+	public Date getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
 	}
 
 	public Rating getRating() {

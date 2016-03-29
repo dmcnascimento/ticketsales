@@ -75,19 +75,7 @@ public class SessionPanel {
 		formatter.setAllowsInvalid(false);
 		formatter.setOverwriteMode(true);
 		spinnerStartHour.setEditor(editorStartHour);
-		sessionPanel.add(spinnerStartHour);
-		
-		JLabel labelEndHour = new JLabel("Hora Fim");
-		sessionPanel.add(labelEndHour);
-		SpinnerDateModel spinnerEndHourModel = new SpinnerDateModel();
-		spinnerEndHourModel.setValue(initialHour.getTime());
-		JSpinner spinnerEndHour = new JSpinner(spinnerEndHourModel);
-		JSpinner.DateEditor editorEndHour = new JSpinner.DateEditor(spinnerEndHour, "HH:mm");
-		formatter = (DateFormatter) editorEndHour.getTextField().getFormatter();
-		formatter.setAllowsInvalid(false);
-		formatter.setOverwriteMode(true);
-		spinnerEndHour.setEditor(editorEndHour);
-		sessionPanel.add(spinnerEndHour, "wrap");
+		sessionPanel.add(spinnerStartHour, "wrap");
 		
 		JButton persistButton = new JButton("Gravar");
 		sessionPanel.add(persistButton, "x2 (container.w+pref)/2");
@@ -97,7 +85,6 @@ public class SessionPanel {
 				Session session = baseSession == null ? new Session() : baseSession;
 				session.setDay(dateModel.getValue());
 				session.setStartHour(spinnerStartHourModel.getDate());
-				session.setEndHour(spinnerEndHourModel.getDate());
 				session.setEvent((Event) eventCombo.getSelectedItem());
 				
 				if (session.getId() == null) {
@@ -115,7 +102,6 @@ public class SessionPanel {
 			dateModel.setValue(baseSession.getDay());
 			eventCombo.setSelectedItem(baseSession.getEvent());
 			spinnerStartHourModel.setValue(baseSession.getStartHour());
-			spinnerEndHourModel.setValue(baseSession.getEndHour());
 			
 			JButton removeButton = new JButton("Remover");
 			removeButton.addActionListener(new ActionListener() {
@@ -158,7 +144,7 @@ public class SessionPanel {
 
 class SessionTableModel extends AbstractTableModel {
 	private static final long serialVersionUID = 1L;
-	private static final String[] COLUMNS = {"Evento", "Dia", "Hora Início", "Hora Fim"};
+	private static final String[] COLUMNS = {"Evento", "Dia", "Hora Início"};
 	
 	private List<Session> sessions;
 	private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -191,8 +177,6 @@ class SessionTableModel extends AbstractTableModel {
 			return dateFormat.format(session.getDay());
 		} else if (columnIndex == 2) {
 			return timeFormat.format(session.getStartHour());
-		} else if (columnIndex == 3) {
-			return timeFormat.format(session.getEndHour());
 		}
 		return null;
 	}

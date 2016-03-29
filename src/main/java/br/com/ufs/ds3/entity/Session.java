@@ -34,10 +34,6 @@ public class Session {
 	@Column(nullable = false)
 	private Date startHour;
 	
-	@Temporal(TemporalType.TIME)
-	@Column(nullable = false)
-	private Date endHour;
-	
 	@ManyToOne(optional = false, fetch = FetchType.EAGER)
 	@JoinColumn(nullable = false)
 	private Event event;
@@ -74,19 +70,11 @@ public class Session {
 		this.startHour = startHour;
 	}
 
-	public Date getEndHour() {
-		return endHour;
-	}
-
-	public void setEndHour(Date endHour) {
-		this.endHour = endHour;
-	}
-	
 	@Override
 	public String toString() {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 		SimpleDateFormat hourFormat = new SimpleDateFormat("HH:mm");
-		return dateFormat.format(day) + " - " + hourFormat.format(startHour) + " - " + hourFormat.format(endHour);
+		return dateFormat.format(day) + " - " + hourFormat.format(startHour);
 	}
 
 	@Override

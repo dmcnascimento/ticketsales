@@ -20,7 +20,6 @@ import javax.swing.table.AbstractTableModel;
 
 import br.com.ufs.ds3.dao.ChairDao;
 import br.com.ufs.ds3.dao.EventDao;
-import br.com.ufs.ds3.dao.PriceDao;
 import br.com.ufs.ds3.dao.SessionDao;
 import br.com.ufs.ds3.dao.TicketDao;
 import br.com.ufs.ds3.entity.Chair;
@@ -30,6 +29,7 @@ import br.com.ufs.ds3.entity.Ticket;
 import br.com.ufs.ds3.gui.main.ContentPanelInfo;
 import br.com.ufs.ds3.gui.main.ContentPanelInfo.ContentPanel;
 import br.com.ufs.ds3.gui.main.TicketSales;
+import br.com.ufs.ds3.service.SessionService;
 import net.miginfocom.swing.MigLayout;
 
 public class TicketPanel {
@@ -80,7 +80,7 @@ public class TicketPanel {
 						chairCombo.addItem(chair);
 					}
 					
-					priceField.setText(new PriceDao().getPriceForSession(session).getTicketPrice().toString());
+					priceField.setText(new SessionService().getPriceForSession(session).getTicketPrice().toString());
 				}
 			}
 		});
@@ -170,7 +170,7 @@ public class TicketPanel {
 
 class TicketTableModel extends AbstractTableModel {
 	private static final long serialVersionUID = 1L;
-	private static final String[] COLUMNS = {"Evento", "Número", "Dia", "Hora Início", "Hora Fim"};
+	private static final String[] COLUMNS = {"Evento", "Número", "Dia", "Hora Início"};
 	
 	private List<Ticket> tickets;
 	private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -210,8 +210,6 @@ class TicketTableModel extends AbstractTableModel {
 			return dateFormat.format(ticket.getSession().getDay());
 		} else if (columnIndex == 3) {
 			return timeFormat.format(ticket.getSession().getStartHour());
-		} else if (columnIndex == 4) {
-			return timeFormat.format(ticket.getSession().getEndHour());
 		}
 		return null;
 	}

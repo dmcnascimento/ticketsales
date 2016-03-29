@@ -27,13 +27,6 @@ public class EventDao {
 		return events;
 	}
 	
-	public List<Event> listEvents() {
-		EntityManager entityManager = db.createEntityManager();
-		List<Event> events = entityManager.createQuery("select o from Event o order by o.title, o.theatre.name", Event.class).getResultList();
-		entityManager.close();
-		return events;
-	}
-	
 	public void persist(Event event) {
 		EntityManager entityManager = db.createEntityManager();
 		entityManager.getTransaction().begin();

@@ -27,9 +27,13 @@ public class Price {
 	@Column(nullable = false)
 	private WeekDay weekDay;
 	
-	@Temporal(TemporalType.TIMESTAMP)
+	@Temporal(TemporalType.TIME)
 	@Column(nullable = false)
 	private Date startHour;
+	
+	@Temporal(TemporalType.TIME)
+	@Column(nullable = false)
+	private Date endHour;
 	
 	@Column(nullable = false, columnDefinition = "NUMERIC(10,2)")
 	private BigDecimal ticketPrice;
@@ -60,6 +64,14 @@ public class Price {
 	
 	public void setStartHour(Date startHour) {
 		this.startHour = startHour;
+	}
+	
+	public Date getEndHour() {
+		return endHour;
+	}
+	
+	public void setEndHour(Date endHour) {
+		this.endHour = endHour;
 	}
 	
 	public BigDecimal getTicketPrice() {
