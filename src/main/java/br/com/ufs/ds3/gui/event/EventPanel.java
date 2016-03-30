@@ -90,7 +90,7 @@ public class EventPanel {
 		JDatePanelImpl endDatePanel = new JDatePanelImpl(endDateModel, datei18n);
 		JDatePickerImpl endDateField = new JDatePickerImpl(endDatePanel, new DateComponentFormatter());
 		eventPanel.add(endDateLabel);
-		eventPanel.add(endDateField);
+		eventPanel.add(endDateField, "wrap");
 		
 		JButton persistButton = new JButton("Gravar");
 		eventPanel.add(persistButton, "x2 (container.w+pref)/2");

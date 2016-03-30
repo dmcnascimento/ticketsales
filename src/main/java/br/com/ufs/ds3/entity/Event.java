@@ -55,10 +55,6 @@ public class Event {
 	@Temporal(TemporalType.DATE)
 	private Date endDate;
 
-	@Column(nullable = false)
-	@Enumerated(EnumType.STRING)
-	private SessionType chairType;
-	
 	public Integer getId() {
 		return id;
 	}
@@ -129,14 +125,6 @@ public class Event {
 
 	public void setTheatre(Theatre theatre) {
 		this.theatre = theatre;
-	}
-	
-	public SessionType getChairType() {
-		return chairType;
-	}
-
-	public void setChairType(SessionType chairType) {
-		this.chairType = chairType;
 	}
 	
 	@Override
