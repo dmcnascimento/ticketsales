@@ -29,6 +29,10 @@ import net.miginfocom.swing.MigLayout;
 
 public class TicketSales {
 	public static final TicketSales INSTANCE = new TicketSales();
+	private static final int INITIAL_WIDTH = 900;
+	private static final int INITIAL_HEIGHT = 600;
+	private static final Dimension INITIAL_DIMENSION = new Dimension(INITIAL_WIDTH, INITIAL_HEIGHT);
+	
 	private JFrame mainWindow;
 	private JPanel currentPanel;
 	private Theatre currentTheatre;
@@ -51,12 +55,12 @@ public class TicketSales {
 		currentContentPanel = ContentPanel.INITIAL;
 		mainWindow = new JFrame("Ticket Sales");
 		mainWindow.setLayout(new BorderLayout());
-		mainWindow.setSize(800, 600);
+		mainWindow.setSize(INITIAL_WIDTH, INITIAL_HEIGHT);
 		mainWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		mainWindow.setJMenuBar(MenubarUtil.createMenubar());
 		currentPanel = createInitialPanel();
-		currentPanel.setPreferredSize(new Dimension(800, 600));
+		currentPanel.setPreferredSize(INITIAL_DIMENSION);
 		mainWindow.add(currentPanel, BorderLayout.CENTER);
 		currentHeaderPanel = createHeaderPanel();
 		mainWindow.add(currentHeaderPanel, BorderLayout.NORTH);
@@ -67,7 +71,7 @@ public class TicketSales {
 	private JPanel createHeaderPanel() {
 		JPanel headerPanel = new JPanel(new MigLayout());
 		headerPanel.setBackground(new Color(171, 170, 171));
-		headerPanel.setPreferredSize(new Dimension(800, 45));
+		headerPanel.setPreferredSize(new Dimension(INITIAL_WIDTH, 45));
 		currentTheatreLabel = new JLabel("Teatro selecionado: " + currentTheatre.getName());
 		headerPanel.add(currentTheatreLabel);
 		
@@ -161,7 +165,7 @@ public class TicketSales {
 			break;
 		}
 		
-		currentPanel.setPreferredSize(new Dimension(800, 600));
+		currentPanel.setPreferredSize(INITIAL_DIMENSION);
 		mainWindow.add(currentPanel, BorderLayout.CENTER);
 		mainWindow.remove(currentHeaderPanel);
 		currentHeaderPanel = createHeaderPanel();

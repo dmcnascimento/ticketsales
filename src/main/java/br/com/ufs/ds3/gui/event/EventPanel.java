@@ -2,30 +2,23 @@ package br.com.ufs.ds3.gui.event;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.table.AbstractTableModel;
 
 import org.jdatepicker.DateModel;
-import org.jdatepicker.impl.DateComponentFormatter;
-import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
-import org.jdatepicker.impl.UtilDateModel;
 
 import br.com.ufs.ds3.dao.EventDao;
 import br.com.ufs.ds3.entity.Event;
@@ -34,63 +27,31 @@ import br.com.ufs.ds3.exception.TicketSalesException;
 import br.com.ufs.ds3.gui.main.ContentPanelInfo;
 import br.com.ufs.ds3.gui.main.ContentPanelInfo.ContentPanel;
 import br.com.ufs.ds3.gui.main.TicketSales;
-import br.com.ufs.ds3.gui.session.SessionPanel;
+import br.com.ufs.ds3.gui.util.SwingComponentUtil;
 import br.com.ufs.ds3.service.EventService;
 import net.miginfocom.swing.MigLayout;
 
 public class EventPanel {
 	public static final String EDIT_EVENT = "editEvent";
 
+	@SuppressWarnings("unchecked")
 	public static JPanel createEventFormPanel(Event baseEvent) {
 		EventService eventService = new EventService();
 		
 		JPanel eventPanel = new JPanel(new MigLayout());
-		JLabel titleLabel = new JLabel("Título");
-		JTextField titleField = new JTextField();
-		eventPanel.add(titleLabel);
-		eventPanel.add(titleField, "span, growx, wrap, width 50:600:");
+		SwingComponentUtil swingComponentUtil = new SwingComponentUtil(eventPanel);
+		JTextField titleField = swingComponentUtil.createAndAddTextComponent("Título", "span, growx, wrap, width 50:600:");
+		JTextField descriptionField = swingComponentUtil.createAndAddTextComponent("Descrição", "span, growx, wrap, width 50:600:, height 100:100:");
+		JComboBox<Rating> ratingCombo = swingComponentUtil.createAndAddComboComponent("Classificação", null);
+		JSpinner durationSpinner = swingComponentUtil.createAndAddIntegerComponent("Duração (minutos)", "width 100:100:");
+		JSpinner intervalDurationSpinner = swingComponentUtil.createAndAddIntegerComponent("Duração do intervalo (minutos)", "width 100:100:, wrap");
+		JDatePickerImpl initialDateField = swingComponentUtil.createAndAddDateComponent("Data inicial", null);
+		JDatePickerImpl endDateField = swingComponentUtil.createAndAddDateComponent("Data final", "wrap");
 		
-		JLabel descriptionLabel = new JLabel("Descrição");
-		JTextArea descriptionField = new JTextArea();
-		eventPanel.add(descriptionLabel);
-		eventPanel.add(descriptionField, "span, growx, wrap, width 50:600:, height 100:100:");
-		
-		JLabel ratingLabel = new JLabel("Classificação");
-		JComboBox<Rating> ratingCombo = new JComboBox<>(Rating.values());
-		eventPanel.add(ratingLabel);
-		eventPanel.add(ratingCombo);
-		
-		JLabel durationLabel = new JLabel("Duração (minutos)");
-		SpinnerNumberModel spinnerNumberModel = new SpinnerNumberModel(0, 0, null, 10);
-		JSpinner durationSpinner = new JSpinner(spinnerNumberModel);
-		eventPanel.add(durationLabel);
-		eventPanel.add(durationSpinner, "width 100:100:");
-		
-		JLabel intervalDurationLabel = new JLabel("Duração do intervalo (minutos)");
-		SpinnerNumberModel spinnerModelIntervalDuration = new SpinnerNumberModel(0, 0, null, 10);
-		JSpinner intervalDurationSpinner = new JSpinner(spinnerModelIntervalDuration);
-		eventPanel.add(intervalDurationLabel);
-		eventPanel.add(intervalDurationSpinner, "width 100:100:, wrap");
-		
-		JLabel initialDateLabel = new JLabel("Data inicial");
-		DateModel<Date> dateModel = new UtilDateModel();
-		Properties datei18n = new Properties();
-		try {
-			datei18n.load(SessionPanel.class.getResourceAsStream("/org/jdatepicker/i18n/Text_pt.properties"));
-		} catch (IOException e) {
-			throw new TicketSalesException(e);
+		DefaultComboBoxModel<Rating> ratingComboModel = (DefaultComboBoxModel<Rating>) ratingCombo.getModel();
+		for (Rating rating : Rating.values()) {
+			ratingComboModel.addElement(rating);
 		}
-		JDatePanelImpl datePanel = new JDatePanelImpl(dateModel, datei18n);
-		JDatePickerImpl initialDateField = new JDatePickerImpl(datePanel, new DateComponentFormatter());
-		eventPanel.add(initialDateLabel);
-		eventPanel.add(initialDateField);
-		
-		JLabel endDateLabel = new JLabel("Data final");
-		DateModel<Date> endDateModel = new UtilDateModel();
-		JDatePanelImpl endDatePanel = new JDatePanelImpl(endDateModel, datei18n);
-		JDatePickerImpl endDateField = new JDatePickerImpl(endDatePanel, new DateComponentFormatter());
-		eventPanel.add(endDateLabel);
-		eventPanel.add(endDateField, "wrap");
 		
 		JButton persistButton = new JButton("Gravar");
 		eventPanel.add(persistButton, "x2 (container.w+pref)/2");
@@ -103,6 +64,9 @@ public class EventPanel {
 				event.setRating((Rating) ratingCombo.getSelectedItem());
 				event.setTheatre(TicketSales.INSTANCE.getCurrentTheatre());
 				event.setDuration((Integer) durationSpinner.getValue());
+				event.setIntervalDuration((Integer) intervalDurationSpinner.getValue());
+				event.setStartDate((Date) initialDateField.getModel().getValue());
+				event.setEndDate((Date) endDateField.getModel().getValue());
 				
 				try {
 					if (event.getId() == null) {
@@ -124,7 +88,9 @@ public class EventPanel {
 			ratingCombo.setSelectedItem(baseEvent.getRating());
 			durationSpinner.setValue(baseEvent.getDuration());
 			intervalDurationSpinner.setValue(baseEvent.getIntervalDuration());
+			DateModel<Date> dateModel = (DateModel<Date>) initialDateField.getModel();
 			dateModel.setValue(baseEvent.getStartDate());
+			DateModel<Date> endDateModel = (DateModel<Date>) endDateField.getModel();
 			endDateModel.setValue(baseEvent.getEndDate());
 			
 			JButton removeButton = new JButton("Remover");
