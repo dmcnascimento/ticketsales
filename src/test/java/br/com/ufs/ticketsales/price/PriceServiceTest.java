@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import br.com.ufs.ds3.dao.EventDao;
 import br.com.ufs.ds3.dao.PriceDao;
 import br.com.ufs.ds3.entity.Event;
 import br.com.ufs.ds3.entity.Price;
@@ -21,7 +22,7 @@ public class PriceServiceTest {
 	@Before
 	public void init() {
 		this.priceDao = Mockito.mock(PriceDao.class);
-		this.priceService = new PriceService(priceDao);
+		this.priceService = new PriceService(priceDao, Mockito.mock(EventDao.class));
 	}
 	
 	@Test(expected = TicketSalesException.class)

@@ -1,12 +1,15 @@
 package br.com.ufs.ticketsales.price.it;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import br.com.ufs.ds3.dao.EventDao;
 import br.com.ufs.ds3.dao.PriceDao;
 import br.com.ufs.ds3.entity.Event;
 import br.com.ufs.ds3.entity.Price;
@@ -17,11 +20,12 @@ import br.com.ufs.ds3.service.PriceService;
 public class PriceServiceIT {
 
 	private PriceService priceService;
+	private EventDao eventDao;
 	
 	@Before
 	public void init() {
-		PriceDao priceDao = Mockito.mock(PriceDao.class);
-		this.priceService = new PriceService(priceDao);
+		this.eventDao = Mockito.mock(EventDao.class);
+		this.priceService = new PriceService(Mockito.mock(PriceDao.class), eventDao);
 	}
 	
 	@Test(expected = TicketSalesException.class)
@@ -58,9 +62,11 @@ public class PriceServiceIT {
 		price2.setEndHour(calendar.getTime());
 		price2.setTicketPrice(new BigDecimal(1d));
 		
-		price.getEvent().getPrices().add(price1);
-		price.getEvent().getPrices().add(price2);
-		
+		List<Price> prices = new ArrayList<>();
+		prices.add(price1);
+		prices.add(price2);
+		Mockito.when(eventDao.getPricesForEvent(price.getEvent())).thenReturn(prices);
+	
 		priceService.checkPriceAlreadyExists(price);
 	}
 	
@@ -98,8 +104,10 @@ public class PriceServiceIT {
 		price2.setEndHour(calendar.getTime());
 		price2.setTicketPrice(new BigDecimal(1d));
 		
-		price.getEvent().getPrices().add(price1);
-		price.getEvent().getPrices().add(price2);
+		List<Price> prices = new ArrayList<>();
+		prices.add(price1);
+		prices.add(price2);
+		Mockito.when(eventDao.getPricesForEvent(price.getEvent())).thenReturn(prices);
 		
 		priceService.checkPriceAlreadyExists(price);
 	}

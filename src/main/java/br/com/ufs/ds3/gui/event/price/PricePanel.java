@@ -11,6 +11,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 
+import br.com.ufs.ds3.dao.TheatreDao;
 import br.com.ufs.ds3.entity.Event;
 import br.com.ufs.ds3.entity.Price;
 import br.com.ufs.ds3.entity.WeekDay;
@@ -26,6 +27,7 @@ public class PricePanel {
 	public static JPanel createPriceFormPanel() {
 		JPanel pricePanel = new JPanel(new MigLayout());
 		SwingComponentUtil swingComponentUtil = new SwingComponentUtil(pricePanel);
+		TheatreDao theatreDao = new TheatreDao();
 		
 		JComboBox<Event> eventCombo = swingComponentUtil.createAndAddComboComponent("Evento", "growx, wrap");
 		JComboBox<WeekDay> dayCombo = swingComponentUtil.createAndAddComboComponent("Dia", null);
@@ -33,7 +35,7 @@ public class PricePanel {
 		JSpinner spinnerEndHour = swingComponentUtil.createAndAddTimeComponent("Hora final", "wrap");
 		JSpinner spinnerPrice = swingComponentUtil.createAndAddMonetaryComponent("Valor", "growx");
 		
-		swingComponentUtil.setComboModelValues(eventCombo, TicketSales.INSTANCE.getCurrentTheatre().getEvents());
+		swingComponentUtil.setComboModelValues(eventCombo, theatreDao.listEventsFromTheatre(TicketSales.INSTANCE.getCurrentTheatre()));
 		swingComponentUtil.setComboModelValues(dayCombo, WeekDay.values());
 		
 		JButton persistButton = new JButton("Gravar");

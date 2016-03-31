@@ -1,35 +1,40 @@
 package br.com.ufs.ticketsales.session.it;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.NoSuchElementException;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import br.com.ufs.ds3.dao.EventDao;
 import br.com.ufs.ds3.dao.SessionDao;
 import br.com.ufs.ds3.entity.Event;
 import br.com.ufs.ds3.entity.NumberedChairSession;
 import br.com.ufs.ds3.entity.Price;
 import br.com.ufs.ds3.entity.Session;
 import br.com.ufs.ds3.entity.WeekDay;
+import br.com.ufs.ds3.exception.TicketSalesException;
 import br.com.ufs.ds3.service.SessionService;
 import br.com.ufs.ds3.service.TheatreService;
 
 public class SessionServiceIT {
 
 	private SessionService sessionService;
+	private EventDao eventDao;
 	
 	@Before
 	public void init() {
 		SessionDao sessionDao = Mockito.mock(SessionDao.class);
 		TheatreService theatreService = Mockito.mock(TheatreService.class);
-		this.sessionService = new SessionService(sessionDao, theatreService);
+		this.eventDao = Mockito.mock(EventDao.class);
+		this.sessionService = new SessionService(sessionDao, theatreService, eventDao);
 	}
 	
-	@Test(expected = NoSuchElementException.class)
+	@Test(expected = TicketSalesException.class)
 	public void noPriceExistsForSession() {
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(Calendar.HOUR_OF_DAY, 9);
@@ -54,8 +59,10 @@ public class SessionServiceIT {
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
 		price2.setEndHour(calendar.getTime());
 		
-		session.getEvent().getPrices().add(price1);
-		session.getEvent().getPrices().add(price2);
+		List<Price> prices = new ArrayList<>();
+		prices.add(price1);
+		prices.add(price2);
+		Mockito.when(eventDao.getPricesForEvent(session.getEvent())).thenReturn(prices);
 		
 		sessionService.getPriceForSession(session);
 	}
@@ -86,8 +93,10 @@ public class SessionServiceIT {
 		calendar.set(Calendar.HOUR_OF_DAY, 23);
 		price2.setEndHour(calendar.getTime());
 		
-		session.getEvent().getPrices().add(price1);
-		session.getEvent().getPrices().add(price2);
+		List<Price> prices = new ArrayList<>();
+		prices.add(price1);
+		prices.add(price2);
+		Mockito.when(eventDao.getPricesForEvent(session.getEvent())).thenReturn(prices);
 		
 		Price result = sessionService.getPriceForSession(session);
 		Assert.assertSame(price1, result);

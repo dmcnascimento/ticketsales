@@ -18,6 +18,7 @@ import javax.swing.table.AbstractTableModel;
 
 import br.com.ufs.ds3.bean.SessionModelBean;
 import br.com.ufs.ds3.dao.SessionDao;
+import br.com.ufs.ds3.dao.TheatreDao;
 import br.com.ufs.ds3.entity.Event;
 import br.com.ufs.ds3.entity.Session;
 import br.com.ufs.ds3.entity.SessionType;
@@ -36,13 +37,14 @@ public class SessionPanel {
 	public static JPanel createSessionFormPanel(Session baseSession) {
 		JPanel sessionPanel = new JPanel(new MigLayout());
 		SwingComponentUtil swingComponentUtil = new SwingComponentUtil(sessionPanel);
+		TheatreDao theatreDao = new TheatreDao();
 
 		JComboBox<Event> eventCombo = swingComponentUtil.createAndAddComboComponent("Evento", "growx, wrap");
 		JComboBox<WeekDay> dayCombo = swingComponentUtil.createAndAddComboComponent("Dia", null);
 		JSpinner spinnerStartHour = swingComponentUtil.createAndAddTimeComponent("Hora inicial", null);
 		JComboBox<SessionType> sessionTypeCombo = swingComponentUtil.createAndAddComboComponent("Tipo de Sessão", "wrap");
 		
-		swingComponentUtil.setComboModelValues(eventCombo, TicketSales.INSTANCE.getCurrentTheatre().getEvents());
+		swingComponentUtil.setComboModelValues(eventCombo, theatreDao.listEventsFromTheatre(TicketSales.INSTANCE.getCurrentTheatre()));
 		swingComponentUtil.setComboModelValues(dayCombo, WeekDay.values());
 		swingComponentUtil.setComboModelValues(sessionTypeCombo, SessionType.values());
 		

@@ -1,15 +1,10 @@
 package br.com.ufs.ds3.entity;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -29,12 +24,6 @@ public class Theatre {
 	@Column(nullable = false)
 	private String address;
 	
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "theatre")
-	private List<Event> events = new ArrayList<>();
-	
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "theatre")
-	private List<Chair> chairs = new ArrayList<>();
-
 	public Integer getId() {
 		return id;
 	}
@@ -57,22 +46,6 @@ public class Theatre {
 
 	public void setAddress(String address) {
 		this.address = address;
-	}
-	
-	public List<Event> getEvents() {
-		return events;
-	}
-	
-	public void setEvents(List<Event> events) {
-		this.events = events;
-	}
-	
-	public List<Chair> getChairs() {
-		return chairs;
-	}
-	
-	public void setChairs(List<Chair> chairs) {
-		this.chairs = chairs;
 	}
 	
 	@Override

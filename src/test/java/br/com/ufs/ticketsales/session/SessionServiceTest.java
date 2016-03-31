@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import br.com.ufs.ds3.bean.SessionModelBean;
+import br.com.ufs.ds3.dao.EventDao;
 import br.com.ufs.ds3.dao.SessionDao;
 import br.com.ufs.ds3.entity.Event;
 import br.com.ufs.ds3.entity.SessionType;
@@ -23,7 +24,7 @@ public class SessionServiceTest {
 	public void init() {
 		SessionDao sessionDao = Mockito.mock(SessionDao.class);
 		TheatreService theatreService = Mockito.mock(TheatreService.class);
-		this.sessionService = new SessionService(sessionDao, theatreService);
+		this.sessionService = new SessionService(sessionDao, theatreService, Mockito.mock(EventDao.class));
 	}
 	
 	@Test(expected = TicketSalesException.class)

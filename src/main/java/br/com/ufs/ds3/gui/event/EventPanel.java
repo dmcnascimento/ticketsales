@@ -20,6 +20,7 @@ import org.jdatepicker.DateModel;
 import org.jdatepicker.impl.JDatePickerImpl;
 
 import br.com.ufs.ds3.dao.EventDao;
+import br.com.ufs.ds3.dao.TheatreDao;
 import br.com.ufs.ds3.entity.Event;
 import br.com.ufs.ds3.entity.Rating;
 import br.com.ufs.ds3.exception.TicketSalesException;
@@ -105,7 +106,8 @@ public class EventPanel {
 	
 	public static JPanel createListEventPanel() {
 		JPanel eventPanel = new JPanel(new MigLayout());
-		EventTableModel eventTableModel = new EventTableModel(TicketSales.INSTANCE.getCurrentTheatre().getEvents());
+		TheatreDao theatreDao = new TheatreDao();
+		EventTableModel eventTableModel = new EventTableModel(theatreDao.listEventsFromTheatre(TicketSales.INSTANCE.getCurrentTheatre()));
 		JTable eventTable = new JTable(eventTableModel);
 		eventTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		JScrollPane scrollPane = new JScrollPane(eventTable);

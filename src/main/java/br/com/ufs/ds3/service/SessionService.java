@@ -11,6 +11,7 @@ import br.com.ufs.ds3.bean.OccupationMap;
 import br.com.ufs.ds3.bean.OccupationMap.OccupationMapBuilder;
 import br.com.ufs.ds3.bean.PhysicalMap;
 import br.com.ufs.ds3.bean.SessionModelBean;
+import br.com.ufs.ds3.dao.EventDao;
 import br.com.ufs.ds3.dao.SessionDao;
 import br.com.ufs.ds3.entity.ChairCondition;
 import br.com.ufs.ds3.entity.FreeChairSession;
@@ -26,15 +27,18 @@ import br.com.ufs.ds3.util.DateUtil;
 public class SessionService {
 	private SessionDao sessionDao;
 	private TheatreService theatreService;
+	private EventDao eventDao;
 	
 	public SessionService() {
 		this.sessionDao = new SessionDao();
 		this.theatreService = new TheatreService();
+		this.eventDao = new EventDao();
 	}
 	
-	public SessionService(SessionDao sessionDao, TheatreService theatreService) {
+	public SessionService(SessionDao sessionDao, TheatreService theatreService, EventDao eventDao) {
 		this.sessionDao = sessionDao;
 		this.theatreService = theatreService;
+		this.eventDao = eventDao;
 	}
 
 	public void createSessions(SessionModelBean sessionModelBean) {
@@ -87,7 +91,7 @@ public class SessionService {
 	public Price getPriceForSession(Session session) {
 		WeekDay weekDay = WeekDay.fromDate(session.getDay());
 		try {
-			return session.getEvent().getPrices().stream().filter(price -> price.getWeekDay() == weekDay)
+			return eventDao.getPricesForEvent(session.getEvent()).stream().filter(price -> price.getWeekDay() == weekDay)
 				.filter(price -> DateUtil.lessOrEq(price.getStartHour(), session.getStartHour()))
 				.filter(price -> price.getEndHour().after(session.getStartHour()))
 			.sorted(new Comparator<Price>() {
@@ -115,7 +119,7 @@ public class SessionService {
 		
 		OccupationMap occupationMap = builder.build();
 		
-		session.getTickets().forEach(ticket -> {
+		sessionDao.listTickets(session).forEach(ticket -> {
 			ChairAvailability chairAvailability = occupationMap.getChairAvailability(ticket.getChair());
 			if (TicketType.fromClass(ticket.getClass()) == TicketType.PAID_TICKET) {
 				chairAvailability.setChairStatus(ChairStatus.OCCUPIED);

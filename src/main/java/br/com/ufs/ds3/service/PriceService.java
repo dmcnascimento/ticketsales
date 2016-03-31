@@ -1,7 +1,9 @@
 package br.com.ufs.ds3.service;
 
+import java.util.List;
 import java.util.function.Predicate;
 
+import br.com.ufs.ds3.dao.EventDao;
 import br.com.ufs.ds3.dao.PriceDao;
 import br.com.ufs.ds3.entity.Price;
 import br.com.ufs.ds3.exception.TicketSalesException;
@@ -9,13 +11,16 @@ import br.com.ufs.ds3.util.DateUtil;
 
 public class PriceService {
 	private PriceDao priceDao;
+	private EventDao eventDao;
 	
 	public PriceService() {
 		this.priceDao = new PriceDao();
+		this.eventDao = new EventDao();
 	}
 	
-	public PriceService(PriceDao priceDao) {
+	public PriceService(PriceDao priceDao, EventDao eventDao) {
 		this.priceDao = priceDao;
+		this.eventDao = eventDao;
 	}
 	
 	public void persist(Price price) {
@@ -52,7 +57,8 @@ public class PriceService {
 			}
 			return false;
 		};
-		if (price.getEvent().getPrices().stream().filter(p -> p.getWeekDay() == price.getWeekDay()).anyMatch(predicate)) {
+		List<Price> prices = eventDao.getPricesForEvent(price.getEvent());
+		if (prices.stream().filter(p -> p.getWeekDay() == price.getWeekDay()).anyMatch(predicate)) {
 			throw new TicketSalesException("Existe choque de horário entre os preços");
 		}
 	}
