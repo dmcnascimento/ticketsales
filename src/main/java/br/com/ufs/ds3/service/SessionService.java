@@ -14,6 +14,7 @@ import br.com.ufs.ds3.bean.SessionModelBean;
 import br.com.ufs.ds3.dao.EventDao;
 import br.com.ufs.ds3.dao.SessionDao;
 import br.com.ufs.ds3.entity.ChairCondition;
+import br.com.ufs.ds3.entity.Event;
 import br.com.ufs.ds3.entity.FreeChairSession;
 import br.com.ufs.ds3.entity.NumberedChairSession;
 import br.com.ufs.ds3.entity.Price;
@@ -42,7 +43,8 @@ public class SessionService {
 	}
 
 	public void createSessions(SessionModelBean sessionModelBean) {
-		if (sessionModelBean.getEvent() == null) {
+		Event event = sessionModelBean.getEvent();
+		if (event == null) {
 			throw new TicketSalesException("O evento deve ser informado");
 		}
 		if (sessionModelBean.getDay() == null) {
@@ -56,12 +58,17 @@ public class SessionService {
 		}
 		
 		Date sessionDate;
-		if (WeekDay.fromDate(sessionModelBean.getEvent().getStartDate()) == sessionModelBean.getDay()) {
-			sessionDate = sessionModelBean.getEvent().getStartDate();
+		if (WeekDay.fromDate(event.getStartDate()) == sessionModelBean.getDay()) {
+			sessionDate = event.getStartDate();
 		} else {
-			sessionDate = findNextDate(sessionModelBean.getEvent().getStartDate(), sessionModelBean.getDay());
+			sessionDate = findNextDate(event.getStartDate(), event.getEndDate(), sessionModelBean.getDay());
 		}
-		while (DateUtil.lessOrEq(sessionDate, sessionModelBean.getEvent().getEndDate())) {
+		
+		if (sessionDate == null) {
+			throw new TicketSalesException("O evento não está disponível no dia selecionado");
+		}
+		
+		while (sessionDate != null) {
 			Session session;
 			if (sessionModelBean.getSessionType() == SessionType.FREE_CHAIR) {
 				session = new FreeChairSession();
@@ -69,21 +76,24 @@ public class SessionService {
 				session = new NumberedChairSession();
 			}
 			
-			session.setEvent(sessionModelBean.getEvent());
+			session.setEvent(event);
 			session.setDay(sessionDate);
 			session.setStartHour(sessionModelBean.getStartHour());
 			sessionDao.persist(session);
 			
-			sessionDate = findNextDate(sessionDate, sessionModelBean.getDay());
+			sessionDate = findNextDate(sessionDate, event.getEndDate(), sessionModelBean.getDay());
 		}
 	}
 	
-	private Date findNextDate(Date start, WeekDay day) {
+	private Date findNextDate(Date start, Date end, WeekDay day) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(start);
 		calendar.add(Calendar.DAY_OF_MONTH, 1);
-		while (WeekDay.fromDate(calendar.getTime()) != day) {
+		while (WeekDay.fromDate(calendar.getTime()) != day && DateUtil.lessOrEq(calendar.getTime(), end)) {
 			calendar.add(Calendar.DAY_OF_MONTH, 1);
+		}
+		if (calendar.getTime().after(end)) {
+			return null;
 		}
 		return calendar.getTime();
 	}
