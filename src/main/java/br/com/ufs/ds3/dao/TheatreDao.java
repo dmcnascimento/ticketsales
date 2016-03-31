@@ -7,15 +7,12 @@ import javax.persistence.EntityManager;
 import br.com.ufs.ds3.db.DB;
 import br.com.ufs.ds3.entity.Theatre;
 
-public class TheatreDao {
-	private DB db;
-	
+public class TheatreDao extends Dao<Theatre> {
 	public TheatreDao() {
-		this.db = new DB();
 	}
 	
 	public TheatreDao(DB db) {
-		this.db = db;
+		super(db);
 	}
 	
 	public List<Theatre> listTheatres() {

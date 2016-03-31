@@ -14,16 +14,12 @@ import br.com.ufs.ds3.entity.Session;
 import br.com.ufs.ds3.entity.Theatre;
 import br.com.ufs.ds3.entity.Ticket;
 
-public class TicketDao {
-
-	private DB db;
-	
+public class TicketDao extends Dao<Ticket> {
 	public TicketDao() {
-		this.db = new DB();
 	}
 	
 	public TicketDao(DB db) {
-		this.db = db;
+		super(db);
 	}
 	
 	public List<Ticket> listTickets(Theatre theatre, Event event, Session session, Integer number) {
@@ -52,22 +48,5 @@ public class TicketDao {
 		List<Ticket> tickets = entityManager.createQuery(query).getResultList();
 		entityManager.close();
 		return tickets;
-	}
-	
-	public void persist(Ticket ticket) {
-		EntityManager entityManager = db.createEntityManager();
-		entityManager.getTransaction().begin();
-		entityManager.persist(ticket);
-		entityManager.getTransaction().commit();
-		entityManager.close();
-	}
-	
-	public Ticket update(Ticket ticket) {
-		EntityManager entityManager = db.createEntityManager();
-		entityManager.getTransaction().begin();
-		ticket = entityManager.merge(ticket);
-		entityManager.getTransaction().commit();
-		entityManager.close();
-		return ticket;
 	}
 }

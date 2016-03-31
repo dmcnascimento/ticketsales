@@ -6,7 +6,7 @@ import java.util.Map;
 public class ContentPanelInfo {
 	public enum ContentPanel {
 		INITIAL, CREATE_EVENT, LIST_EVENT, CREATE_SESSION, LIST_SESSION, CREATE_TICKET, LIST_TICKET,
-		UPDATE_PHYSICAL_MAP;
+		UPDATE_PHYSICAL_MAP, CREATE_PRICE, LIST_PRICE;
 	}
 	
 	private ContentPanel contentPanel;

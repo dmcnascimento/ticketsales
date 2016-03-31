@@ -1,11 +1,13 @@
 package br.com.ufs.ds3.gui.util;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Currency;
 import java.util.Date;
 import java.util.Properties;
 
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -26,7 +28,7 @@ import br.com.ufs.ds3.gui.session.SessionPanel;
 
 public class SwingComponentUtil {
 	public static enum ComponentType {
-		TEXT, DATE, TIME, INTEGER, COMBO;
+		TEXT, DATE, TIME, INTEGER, COMBO, MONETARY;
 	}
 
 	private JComponent parent;
@@ -59,11 +61,15 @@ public class SwingComponentUtil {
 		return (JComboBox<T>) createAndAddComponent(label, ComponentType.COMBO, constraints);
 	}
 	
+	public JSpinner createAndAddMonetaryComponent(String label, String constraints) {
+		return (JSpinner) createAndAddComponent(label, ComponentType.MONETARY, constraints);
+	}
+	
 	public JComponent createAndAddComponent(String label, ComponentType componentType, String constraints) {
 		return createAndAddComponent(label, componentType, this.parent, constraints);
 	}
 	
-	public JComponent createAndAddComponent(String label, ComponentType componentType, JComponent parent, String constraints) {
+	public <T> JComponent createAndAddComponent(String label, ComponentType componentType, JComponent parent, String constraints) {
 		JLabel labelComponent = new JLabel(label);
 		JComponent component;
 		switch (componentType) {
@@ -99,15 +105,53 @@ public class SwingComponentUtil {
 			component = new JSpinner(spinnerNumberModel);
 			break;
 		case COMBO:
-			component = new JComboBox<>(new DefaultComboBoxModel<>());
+			JComboBox<T> combo = new JComboBox<T>(new CustomComboBoxModel<T>());
+			combo.setRenderer(new CustomListCellRenderer());
+			addNoSelectionOption(combo);
+			component = combo;
 			break;
+		case MONETARY:
+	        SpinnerNumberModel model = new SpinnerNumberModel(0d, 0d, null, 1d);
+	        JSpinner spinner = new JSpinner(model);
+	        JSpinner.NumberEditor numberEditor = new JSpinner.NumberEditor(spinner);
+	        DecimalFormat format = numberEditor.getFormat();
+	        format.setMinimumFractionDigits(2);
+	        format.setMaximumFractionDigits(2);
+	        format.setCurrency(Currency.getInstance("BRL"));
+	        spinner.setEditor(numberEditor);
+	        component = spinner;
+	        break;
 		default:
 			throw new TicketSalesException("Componente desconhecido: " + componentType);
 		}
 		
 		parent.add(labelComponent);
 		parent.add(component, constraints);
-		
 		return component;
+	}
+	
+	public <T> void setComboModelValues(JComboBox<T> combo, Collection<T> values) {
+		combo.removeAllItems();
+		addNoSelectionOption(combo);
+		for (T value : values) {
+			combo.addItem(value);
+		}
+	}
+	
+	public <T> void setComboModelValues(JComboBox<T> combo, T[] values) {
+		combo.removeAllItems();
+		addNoSelectionOption(combo);
+		for (T value : values) {
+			combo.addItem(value);
+		}
+	}
+
+	public void clearCombo(JComboBox<?> combo) {
+		combo.removeAllItems();
+		addNoSelectionOption(combo);
+	}
+	
+	private void addNoSelectionOption(JComboBox<?> combo) {
+		combo.addItem(null);
 	}
 }

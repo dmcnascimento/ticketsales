@@ -21,6 +21,10 @@ class MenubarUtil {
 		menuBar.add(evento);
 		evento.add(new CrudMenuBarAction("Criar", ContentPanel.CREATE_EVENT));
 		evento.add(new CrudMenuBarAction("Listar", ContentPanel.LIST_EVENT));
+		JMenu preco = new JMenu("Preço");
+		evento.add(preco);
+		preco.add(new CrudMenuBarAction("Criar", ContentPanel.CREATE_PRICE));
+		preco.add(new CrudMenuBarAction("Listar", ContentPanel.LIST_PRICE));
 		
 		JMenu sessao = new JMenu("Sessão");
 		menuBar.add(sessao);

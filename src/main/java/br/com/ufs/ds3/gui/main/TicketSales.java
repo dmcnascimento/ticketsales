@@ -22,6 +22,7 @@ import br.com.ufs.ds3.entity.Session;
 import br.com.ufs.ds3.entity.Theatre;
 import br.com.ufs.ds3.exception.TicketSalesException;
 import br.com.ufs.ds3.gui.event.EventPanel;
+import br.com.ufs.ds3.gui.event.price.PricePanel;
 import br.com.ufs.ds3.gui.main.ContentPanelInfo.ContentPanel;
 import br.com.ufs.ds3.gui.session.SessionPanel;
 import br.com.ufs.ds3.gui.ticket.TicketPanel;
@@ -157,6 +158,13 @@ public class TicketSales {
 		case LIST_TICKET:
 			mainWindow.setTitle("Ticket Sales - Listar Ingressos");
 			currentPanel = TicketPanel.createListTicketPanel();
+			break;
+		case CREATE_PRICE:
+			mainWindow.setTitle("Ticket Sales - Criar Preço");
+			currentPanel = PricePanel.createPriceFormPanel();
+			break;
+		case LIST_PRICE:
+			mainWindow.setTitle("Ticket Sales - Listar Preços");
 			break;
 		case INITIAL:
 		default:

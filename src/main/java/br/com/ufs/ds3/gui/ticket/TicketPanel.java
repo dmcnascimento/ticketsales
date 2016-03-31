@@ -18,9 +18,6 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.AbstractTableModel;
 
-import br.com.ufs.ds3.dao.ChairDao;
-import br.com.ufs.ds3.dao.EventDao;
-import br.com.ufs.ds3.dao.SessionDao;
 import br.com.ufs.ds3.dao.TicketDao;
 import br.com.ufs.ds3.entity.Chair;
 import br.com.ufs.ds3.entity.Event;
@@ -29,6 +26,7 @@ import br.com.ufs.ds3.entity.Ticket;
 import br.com.ufs.ds3.gui.main.ContentPanelInfo;
 import br.com.ufs.ds3.gui.main.ContentPanelInfo.ContentPanel;
 import br.com.ufs.ds3.gui.main.TicketSales;
+import br.com.ufs.ds3.gui.util.SwingComponentUtil;
 import br.com.ufs.ds3.service.SessionService;
 import net.miginfocom.swing.MigLayout;
 
@@ -36,24 +34,20 @@ public class TicketPanel {
 
 	public static JPanel createTicketFormPanel() {
 		JPanel ticketPanel = new JPanel(new MigLayout());
+		SwingComponentUtil swingComponentUtil = new SwingComponentUtil(ticketPanel);
 		
-		JLabel eventLabel = new JLabel("Evento");
-		JComboBox<Event> eventCombo = new JComboBox<>(new EventDao().listEventsFromTheatre(TicketSales.INSTANCE.getCurrentTheatre()).toArray(new Event[]{}));
-		ticketPanel.add(eventLabel);
-		ticketPanel.add(eventCombo, "growx");
-		
-		JLabel sessionLabel = new JLabel("Sessão");
-		JComboBox<Session> sessionCombo = new JComboBox<>();
-		ticketPanel.add(sessionLabel);
-		ticketPanel.add(sessionCombo, "growx, wrap");
+		JComboBox<Event> eventCombo = swingComponentUtil.createAndAddComboComponent("Evento", "growx");
+		JComboBox<Session> sessionCombo = swingComponentUtil.createAndAddComboComponent("Sessão", "growx, wrap");
 		
 		eventCombo.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
-					sessionCombo.removeAllItems();
-					for (Session session : new SessionDao().listSessionsFromEvent((Event) eventCombo.getSelectedItem())) {
-						sessionCombo.addItem(session);
+					if (eventCombo.getSelectedItem() != null) {
+						Event event = (Event) eventCombo.getSelectedItem();
+						swingComponentUtil.setComboModelValues(sessionCombo, event.getSessions());
+					} else {
+						swingComponentUtil.clearCombo(sessionCombo);
 					}
 				}
 			}
@@ -74,11 +68,11 @@ public class TicketPanel {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
 					Session session = (Session) sessionCombo.getSelectedItem();
-					List<Chair> availableChairs = new ChairDao().listAvailableChairsForSession(session);
-					chairCombo.removeAllItems();
-					for (Chair chair : availableChairs) {
-						chairCombo.addItem(chair);
-					}
+//					List<Chair> availableChairs = new ChairDao().listAvailableChairsForSession(session);
+//					chairCombo.removeAllItems();
+//					for (Chair chair : availableChairs) {
+//						chairCombo.addItem(chair);
+//					}
 					
 					priceField.setText(new SessionService().getPriceForSession(session).getTicketPrice().toString());
 				}
@@ -103,9 +97,10 @@ public class TicketPanel {
 	
 	public static JPanel createListTicketPanel() {
 		JPanel ticketPanel = new JPanel(new MigLayout());
+		SwingComponentUtil swingComponentUtil = new SwingComponentUtil(ticketPanel);
 		
 		JLabel eventLabel = new JLabel("Evento");
-		JComboBox<Event> eventCombo = new JComboBox<>(new EventDao().listEventsFromTheatre(TicketSales.INSTANCE.getCurrentTheatre()).toArray(new Event[]{}));
+		JComboBox<Event> eventCombo = new JComboBox<>(TicketSales.INSTANCE.getCurrentTheatre().getEvents().toArray(new Event[] {}));
 		ticketPanel.add(eventLabel);
 		ticketPanel.add(eventCombo, "growx");
 		
@@ -118,9 +113,11 @@ public class TicketPanel {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
-					sessionCombo.removeAllItems();
-					for (Session session : new SessionDao().listSessionsFromEvent((Event) eventCombo.getSelectedItem())) {
-						sessionCombo.addItem(session);
+					if (eventCombo.getSelectedItem() != null) {
+						Event event = (Event) eventCombo.getSelectedItem();
+						swingComponentUtil.setComboModelValues(sessionCombo, event.getSessions());
+					} else {
+						swingComponentUtil.clearCombo(sessionCombo);
 					}
 				}
 			}

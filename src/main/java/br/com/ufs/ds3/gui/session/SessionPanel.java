@@ -3,25 +3,20 @@ package br.com.ufs.ds3.gui.session;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.SpinnerDateModel;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.text.DateFormatter;
 
 import br.com.ufs.ds3.bean.SessionModelBean;
-import br.com.ufs.ds3.dao.EventDao;
 import br.com.ufs.ds3.dao.SessionDao;
 import br.com.ufs.ds3.entity.Event;
 import br.com.ufs.ds3.entity.Session;
@@ -31,6 +26,7 @@ import br.com.ufs.ds3.exception.TicketSalesException;
 import br.com.ufs.ds3.gui.main.ContentPanelInfo;
 import br.com.ufs.ds3.gui.main.ContentPanelInfo.ContentPanel;
 import br.com.ufs.ds3.gui.main.TicketSales;
+import br.com.ufs.ds3.gui.util.SwingComponentUtil;
 import br.com.ufs.ds3.service.SessionService;
 import net.miginfocom.swing.MigLayout;
 
@@ -39,36 +35,16 @@ public class SessionPanel {
 
 	public static JPanel createSessionFormPanel(Session baseSession) {
 		JPanel sessionPanel = new JPanel(new MigLayout());
+		SwingComponentUtil swingComponentUtil = new SwingComponentUtil(sessionPanel);
+
+		JComboBox<Event> eventCombo = swingComponentUtil.createAndAddComboComponent("Evento", "growx, wrap");
+		JComboBox<WeekDay> dayCombo = swingComponentUtil.createAndAddComboComponent("Dia", null);
+		JSpinner spinnerStartHour = swingComponentUtil.createAndAddTimeComponent("Hora inicial", null);
+		JComboBox<SessionType> sessionTypeCombo = swingComponentUtil.createAndAddComboComponent("Tipo de Sessão", "wrap");
 		
-		JLabel eventLabel = new JLabel("Evento");
-		JComboBox<Event> eventCombo = new JComboBox<>(new EventDao().listEventsFromTheatre(TicketSales.INSTANCE.getCurrentTheatre()).toArray(new Event[]{}));
-		sessionPanel.add(eventLabel);
-		sessionPanel.add(eventCombo, "growx, wrap");
-		
-		JLabel dayLabel = new JLabel("Dia");
-		JComboBox<WeekDay> dayCombo = new JComboBox<>(WeekDay.values());
-		sessionPanel.add(dayLabel);
-		sessionPanel.add(dayCombo);
-		
-		Calendar initialHour = Calendar.getInstance();
-		initialHour.set(1970, 0, 1, 0, 0, 0);
-		initialHour.set(Calendar.MILLISECOND, 0);
-		JLabel labelStartHour = new JLabel("Hora Início");
-		sessionPanel.add(labelStartHour);
-		SpinnerDateModel spinnerStartHourModel = new SpinnerDateModel();
-		spinnerStartHourModel.setValue(initialHour.getTime());
-		JSpinner spinnerStartHour = new JSpinner(spinnerStartHourModel);
-		JSpinner.DateEditor editorStartHour = new JSpinner.DateEditor(spinnerStartHour, "HH:mm");
-		DateFormatter formatter = (DateFormatter) editorStartHour.getTextField().getFormatter();
-		formatter.setAllowsInvalid(false);
-		formatter.setOverwriteMode(true);
-		spinnerStartHour.setEditor(editorStartHour);
-		sessionPanel.add(spinnerStartHour);
-		
-		JLabel sessionTypeLabel = new JLabel("Tipo de Sessão");
-		JComboBox<SessionType> sessionTypeCombo = new JComboBox<>(SessionType.values());
-		sessionPanel.add(sessionTypeLabel);
-		sessionPanel.add(sessionTypeCombo, "wrap");
+		swingComponentUtil.setComboModelValues(eventCombo, TicketSales.INSTANCE.getCurrentTheatre().getEvents());
+		swingComponentUtil.setComboModelValues(dayCombo, WeekDay.values());
+		swingComponentUtil.setComboModelValues(sessionTypeCombo, SessionType.values());
 		
 		JButton persistButton = new JButton("Gravar");
 		sessionPanel.add(persistButton, "x2 (container.w+pref)/2");

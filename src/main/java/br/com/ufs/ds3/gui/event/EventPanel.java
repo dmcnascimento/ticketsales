@@ -5,7 +5,6 @@ import java.awt.event.ActionListener;
 import java.util.Date;
 import java.util.List;
 
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
@@ -47,11 +46,8 @@ public class EventPanel {
 		JSpinner intervalDurationSpinner = swingComponentUtil.createAndAddIntegerComponent("Duração do intervalo (minutos)", "width 100:100:, wrap");
 		JDatePickerImpl initialDateField = swingComponentUtil.createAndAddDateComponent("Data inicial", null);
 		JDatePickerImpl endDateField = swingComponentUtil.createAndAddDateComponent("Data final", "wrap");
-		
-		DefaultComboBoxModel<Rating> ratingComboModel = (DefaultComboBoxModel<Rating>) ratingCombo.getModel();
-		for (Rating rating : Rating.values()) {
-			ratingComboModel.addElement(rating);
-		}
+
+		swingComponentUtil.setComboModelValues(ratingCombo, Rating.values());
 		
 		JButton persistButton = new JButton("Gravar");
 		eventPanel.add(persistButton, "x2 (container.w+pref)/2");
@@ -109,7 +105,7 @@ public class EventPanel {
 	
 	public static JPanel createListEventPanel() {
 		JPanel eventPanel = new JPanel(new MigLayout());
-		EventTableModel eventTableModel = new EventTableModel(new EventDao().listEventsFromTheatre(TicketSales.INSTANCE.getCurrentTheatre()));
+		EventTableModel eventTableModel = new EventTableModel(TicketSales.INSTANCE.getCurrentTheatre().getEvents());
 		JTable eventTable = new JTable(eventTableModel);
 		eventTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		JScrollPane scrollPane = new JScrollPane(eventTable);

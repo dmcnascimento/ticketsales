@@ -1,6 +1,8 @@
 package br.com.ufs.ds3.entity;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,6 +14,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -54,6 +57,12 @@ public class Event {
 	@Column(nullable = false)
 	@Temporal(TemporalType.DATE)
 	private Date endDate;
+	
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "event")
+	private List<Price> prices = new ArrayList<>();
+	
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "event")
+	private List<Session> sessions = new ArrayList<>();
 
 	public Integer getId() {
 		return id;
@@ -125,6 +134,22 @@ public class Event {
 
 	public void setTheatre(Theatre theatre) {
 		this.theatre = theatre;
+	}
+
+	public List<Price> getPrices() {
+		return prices;
+	}
+	
+	public void setPrices(List<Price> prices) {
+		this.prices = prices;
+	}
+	
+	public List<Session> getSessions() {
+		return sessions;
+	}
+	
+	public void setSessions(List<Session> sessions) {
+		this.sessions = sessions;
 	}
 	
 	@Override
