@@ -1,33 +1,51 @@
 package br.com.ufs.ds3.gui.ticket;
 
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.AbstractTableModel;
 
+import br.com.ufs.ds3.bean.ChairAvailability;
+import br.com.ufs.ds3.bean.ChairAvailability.ChairStatus;
+import br.com.ufs.ds3.bean.OccupationMap;
+import br.com.ufs.ds3.bean.TicketSaleBean;
+import br.com.ufs.ds3.bean.TicketSaleBean.TicketInfo;
 import br.com.ufs.ds3.dao.TicketDao;
-import br.com.ufs.ds3.entity.Chair;
 import br.com.ufs.ds3.entity.Event;
+import br.com.ufs.ds3.entity.NumberedChairSession;
+import br.com.ufs.ds3.entity.Price;
 import br.com.ufs.ds3.entity.Session;
+import br.com.ufs.ds3.entity.SessionType;
 import br.com.ufs.ds3.entity.Ticket;
+import br.com.ufs.ds3.exception.TicketSalesException;
 import br.com.ufs.ds3.gui.main.ContentPanelInfo;
 import br.com.ufs.ds3.gui.main.ContentPanelInfo.ContentPanel;
 import br.com.ufs.ds3.gui.main.TicketSales;
 import br.com.ufs.ds3.gui.util.SwingComponentUtil;
 import br.com.ufs.ds3.service.SessionService;
+import br.com.ufs.ds3.service.TicketService;
 import net.miginfocom.swing.MigLayout;
 
 public class TicketPanel {
@@ -35,9 +53,60 @@ public class TicketPanel {
 	public static JPanel createTicketFormPanel() {
 		JPanel ticketPanel = new JPanel(new MigLayout());
 		SwingComponentUtil swingComponentUtil = new SwingComponentUtil(ticketPanel);
+		SessionService sessionService = new SessionService();
+		TicketService ticketService = new TicketService();
 		
-		JComboBox<Event> eventCombo = swingComponentUtil.createAndAddComboComponent("Evento", "growx");
+		JComboBox<Event> eventCombo = swingComponentUtil.createAndAddComboComponent("Evento", "growx, wrap");
 		JComboBox<Session> sessionCombo = swingComponentUtil.createAndAddComboComponent("Sessão", "growx, wrap");
+		
+		JLabel chairLabel = new JLabel("Cadeiras");
+		ticketPanel.add(chairLabel);
+		JScrollPane chairScrollPane = new JScrollPane();
+		ticketPanel.add(chairScrollPane, "wrap, width 300:500:, height 150:150:");
+		
+		JSpinner spinnerInteira = swingComponentUtil.createAndAddIntegerComponent("Quantidade (inteira)", null);
+		JSpinner spinnerMeia = swingComponentUtil.createAndAddIntegerComponent("Quantidade (meia)", "wrap");
+		SpinnerNumberModel modelInteira = (SpinnerNumberModel) spinnerInteira.getModel();
+		SpinnerNumberModel modelMeia = (SpinnerNumberModel) spinnerMeia.getModel();
+		modelInteira.setStepSize(1);
+		modelMeia.setStepSize(1);
+		modelInteira.setMaximum(0);
+		modelMeia.setMaximum(0);
+		JTextField priceField = swingComponentUtil.createAndAddTextComponent("Total", "wrap, width 75:75:");
+		priceField.setEditable(false);
+		
+		ChangeListener spinnerChangeListener = new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				Session session = (Session) sessionCombo.getSelectedItem();
+				if (SessionType.fromClass(session.getClass()) == SessionType.NUMBERED_CHAIR) {
+					if (e.getSource() == spinnerMeia) {
+						int max = (int) modelMeia.getMaximum();
+						int valorMeia = (int) modelMeia.getValue();
+						int valorInteira = (int) modelInteira.getValue();
+						if (valorInteira + valorMeia < max) {
+							modelInteira.setValue(valorInteira + 1);
+						} else if (valorInteira + valorMeia > max) {
+							modelInteira.setValue(valorInteira - 1);
+						}
+					}
+				}
+				
+				int totalInteiras = (int) spinnerInteira.getValue();
+				int totalMeias = (int) spinnerMeia.getValue();
+				Price price = sessionService.getPriceForSession((Session) sessionCombo.getSelectedItem());
+
+				NumberFormat numberFormat = NumberFormat.getNumberInstance();
+				numberFormat.setMaximumFractionDigits(2);
+				numberFormat.setMinimumFractionDigits(2);
+				priceField.setText(numberFormat.format(ticketService.calculatePrice(price.getTicketPrice(), totalInteiras, totalMeias).doubleValue()));
+			}
+		};
+		
+		spinnerInteira.addChangeListener(spinnerChangeListener);
+		spinnerMeia.addChangeListener(spinnerChangeListener);
+		
+		swingComponentUtil.setComboModelValues(eventCombo, TicketSales.INSTANCE.getCurrentTheatre().getEvents());
 		
 		eventCombo.addItemListener(new ItemListener() {
 			@Override
@@ -52,30 +121,78 @@ public class TicketPanel {
 				}
 			}
 		});
-		
-		JLabel chairLabel = new JLabel("Cadeira");
-		JComboBox<Chair> chairCombo = new JComboBox<>();
-		ticketPanel.add(chairLabel);
-		ticketPanel.add(chairCombo, "wrap");
-		
-		JLabel priceLabel = new JLabel("Preço");
-		JTextField priceField = new JTextField();
-		ticketPanel.add(priceLabel);
-		ticketPanel.add(priceField, "wrap, width 75:75:");
-		
+
+		List<ChairAvailability> selectedChairs = new ArrayList<>();
 		sessionCombo.addItemListener(new ItemListener() {
+			private JPanel chairPanel;
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
-					Session session = (Session) sessionCombo.getSelectedItem();
-//					List<Chair> availableChairs = new ChairDao().listAvailableChairsForSession(session);
-//					chairCombo.removeAllItems();
-//					for (Chair chair : availableChairs) {
-//						chairCombo.addItem(chair);
-//					}
-					
-					priceField.setText(new SessionService().getPriceForSession(session).getTicketPrice().toString());
+					if (sessionCombo.getSelectedItem() != null) {
+						Session session = (Session) sessionCombo.getSelectedItem();
+						try {
+							sessionService.getPriceForSession(session);
+						} catch (TicketSalesException ex) {
+							JOptionPane.showMessageDialog(null, ex.getMessage());
+						}
+						if (SessionType.fromClass(session.getClass()) == SessionType.NUMBERED_CHAIR) {
+							chairPanel = createChairPanel((NumberedChairSession) session);
+							chairScrollPane.setViewportView(chairPanel);
+							modelInteira.setMaximum(0);
+							modelMeia.setMaximum(0);
+							spinnerInteira.setEnabled(false);
+						} else {
+							modelInteira.setMaximum(null);
+							modelMeia.setMaximum(null);
+							spinnerInteira.setEnabled(true);
+							chairScrollPane.setViewportView(null);
+						}
+					} else {
+						modelInteira.setMaximum(null);
+						modelMeia.setMaximum(null);
+						spinnerInteira.setEnabled(true);
+						chairScrollPane.setViewportView(null);
+						priceField.setText("");
+					}
+					modelInteira.setValue(0);
+					modelMeia.setValue(0);
 				}
+			}
+
+			private JPanel createChairPanel(NumberedChairSession session) {
+				OccupationMap occupationMap = new SessionService().generateOccupationMap(session);
+				JPanel panel = new JPanel(new GridLayout(occupationMap.getRows(), occupationMap.getCols()));
+				
+				for (ChairAvailability chairAvailability : occupationMap.getChairAvailabilities()) {
+					JCheckBox checkBox = new JCheckBox();
+					panel.add(checkBox);
+					if (chairAvailability.getChairStatus() != ChairStatus.FREE) {
+						checkBox.setEnabled(false);
+					} else {
+						checkBox.addActionListener(new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent e) {
+								if (checkBox.isSelected()) {
+									spinnerInteira.setValue(((Integer) spinnerInteira.getValue()) + 1);
+									selectedChairs.add(chairAvailability);
+								} else {
+									if (((Integer) spinnerInteira.getValue()) > 0) {
+										spinnerInteira.setValue(((Integer) spinnerInteira.getValue()) - 1);
+									} else {
+										spinnerMeia.setValue(((Integer) spinnerMeia.getValue()) - 1);
+									}
+									selectedChairs.remove(chairAvailability);
+								}
+								
+								int max = ((Integer) modelInteira.getValue()) + ((Integer) modelMeia.getValue());
+								modelInteira.setMaximum(max);
+								modelMeia.setMaximum(max);
+							}
+						});
+					}
+				}
+				
+				return panel;
 			}
 		});
 		
@@ -84,11 +201,38 @@ public class TicketPanel {
 		persistButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Ticket ticket = new Ticket();
-				ticket.setSession((Session) sessionCombo.getSelectedItem());
-				
-				JOptionPane.showMessageDialog(null, "Registro gravado com sucesso");
-				TicketSales.INSTANCE.changePanel(new ContentPanelInfo(ContentPanel.CREATE_TICKET));
+				try {
+					TicketSaleBean ticketSaleBean = new TicketSaleBean();
+					Session session = (Session) sessionCombo.getSelectedItem();
+					ticketSaleBean.setBasePrice(sessionService.getPriceForSession(session).getTicketPrice());
+					ticketSaleBean.setSession(session);
+					for (int i = 0; i < (int) modelInteira.getValue(); i++) {
+						TicketInfo ticketInfo = new TicketInfo();
+						ticketSaleBean.getFullPriceTickets().add(ticketInfo);
+					}
+					for (int i = 0; i < (int) modelMeia.getValue(); i++) {
+						TicketInfo ticketInfo = new TicketInfo();
+						ticketSaleBean.getHalfPriceTickets().add(ticketInfo);
+					}
+					
+					if (SessionType.fromClass(session.getClass()) == SessionType.NUMBERED_CHAIR) {
+						Iterator<ChairAvailability> it = selectedChairs.iterator();
+						for (TicketInfo ticketInfo : ticketSaleBean.getFullPriceTickets()) {
+							ChairAvailability chairAvailability = it.next();
+							ticketInfo.setChair(chairAvailability.getChair());
+						}
+						for (TicketInfo ticketInfo : ticketSaleBean.getHalfPriceTickets()) {
+							ChairAvailability chairAvailability = it.next();
+							ticketInfo.setChair(chairAvailability.getChair());
+						}
+					}
+					
+					ticketService.sellTickets(ticketSaleBean);
+					JOptionPane.showMessageDialog(null, "Registro gravado com sucesso");
+					TicketSales.INSTANCE.changePanel(new ContentPanelInfo(ContentPanel.CREATE_TICKET));
+				} catch (TicketSalesException ex) {
+					JOptionPane.showMessageDialog(null, ex.getMessage());
+				}
 			}
 		});
 		
@@ -199,15 +343,6 @@ class TicketTableModel extends AbstractTableModel {
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		Ticket ticket = tickets.get(rowIndex);
-		if (columnIndex == 0) {
-			return ticket.getSession().getEvent().getTitle();
-		} else if (columnIndex == 1) {
-			return ticket.getNumber();
-		} else if (columnIndex == 2) {
-			return dateFormat.format(ticket.getSession().getDay());
-		} else if (columnIndex == 3) {
-			return timeFormat.format(ticket.getSession().getStartHour());
-		}
 		return null;
 	}
 	

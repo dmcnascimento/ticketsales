@@ -44,9 +44,6 @@ public class PriceService {
 
 	public void checkPriceAlreadyExists(Price price) {
 		Predicate<Price> predicate = p -> {
-			if (p.getWeekDay() != price.getWeekDay()) {
-				return false;
-			}
 			if (price.getStartHour().equals(p.getStartHour())) {
 				return true;
 			}
@@ -55,7 +52,7 @@ public class PriceService {
 			}
 			return false;
 		};
-		if (price.getEvent().getPrices().stream().anyMatch(predicate)) {
+		if (price.getEvent().getPrices().stream().filter(p -> p.getWeekDay() == price.getWeekDay()).anyMatch(predicate)) {
 			throw new TicketSalesException("Existe choque de horário entre os preços");
 		}
 	}

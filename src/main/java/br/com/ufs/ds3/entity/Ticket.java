@@ -21,7 +21,7 @@ public abstract class Ticket {
 	@Column
 	private Integer id;
 	
-	@Column(nullable = false)
+	@Column(nullable = true)
 	private Integer number;
 	
 	@ManyToOne(optional = true, fetch = FetchType.EAGER)

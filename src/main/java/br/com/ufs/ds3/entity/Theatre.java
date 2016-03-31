@@ -31,6 +31,9 @@ public class Theatre {
 	
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "theatre")
 	private List<Event> events = new ArrayList<>();
+	
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "theatre")
+	private List<Chair> chairs = new ArrayList<>();
 
 	public Integer getId() {
 		return id;
@@ -62,6 +65,14 @@ public class Theatre {
 	
 	public void setEvents(List<Event> events) {
 		this.events = events;
+	}
+	
+	public List<Chair> getChairs() {
+		return chairs;
+	}
+	
+	public void setChairs(List<Chair> chairs) {
+		this.chairs = chairs;
 	}
 	
 	@Override

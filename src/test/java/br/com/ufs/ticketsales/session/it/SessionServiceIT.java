@@ -16,6 +16,7 @@ import br.com.ufs.ds3.entity.Price;
 import br.com.ufs.ds3.entity.Session;
 import br.com.ufs.ds3.entity.WeekDay;
 import br.com.ufs.ds3.service.SessionService;
+import br.com.ufs.ds3.service.TheatreService;
 
 public class SessionServiceIT {
 
@@ -24,7 +25,8 @@ public class SessionServiceIT {
 	@Before
 	public void init() {
 		SessionDao sessionDao = Mockito.mock(SessionDao.class);
-		this.sessionService = new SessionService(sessionDao);
+		TheatreService theatreService = Mockito.mock(TheatreService.class);
+		this.sessionService = new SessionService(sessionDao, theatreService);
 	}
 	
 	@Test(expected = NoSuchElementException.class)

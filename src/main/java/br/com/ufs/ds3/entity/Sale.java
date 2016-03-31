@@ -10,6 +10,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -32,6 +34,10 @@ public class Sale {
 	
 	@Column(nullable = false, columnDefinition = "NUMERIC(10,2)")
 	private BigDecimal saleValue;
+	
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(nullable = false)
+	private Session session;
 	
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "sale")
 	private List<PaidTicket> paidTickets;
@@ -56,6 +62,14 @@ public class Sale {
 		return saleValue;
 	}
 
+	public Session getSession() {
+		return session;
+	}
+	
+	public void setSession(Session session) {
+		this.session = session;
+	}
+	
 	public void setSaleValue(BigDecimal saleValue) {
 		this.saleValue = saleValue;
 	}
