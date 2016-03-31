@@ -18,7 +18,7 @@ public class EventServiceTest {
 		EventService eventService = new EventService(eventDao);
 		
 		Event event = new Event();
-		event.setTheatre(Mockito.mock(Theatre.class));
+		event.setTheatre(new Theatre());
 		event.setDescription("Teste");
 		event.setRating(Rating.C14);
 		event.setTitle("Teste");
@@ -48,7 +48,7 @@ public class EventServiceTest {
 		EventService eventService = new EventService(eventDao);
 		
 		Event event = new Event();
-		event.setTheatre(Mockito.mock(Theatre.class));
+		event.setTheatre(new Theatre());
 		event.setDescription("");
 		event.setRating(Rating.C14);
 		event.setTitle("Teste");
@@ -63,7 +63,7 @@ public class EventServiceTest {
 		EventService eventService = new EventService(eventDao);
 		
 		Event event = new Event();
-		event.setTheatre(Mockito.mock(Theatre.class));
+		event.setTheatre(new Theatre());
 		event.setDescription("Teste");
 		event.setRating(null);
 		event.setTitle("Teste");
@@ -78,7 +78,7 @@ public class EventServiceTest {
 		EventService eventService = new EventService(eventDao);
 		
 		Event event = new Event();
-		event.setTheatre(Mockito.mock(Theatre.class));
+		event.setTheatre(new Theatre());
 		event.setDescription("Teste");
 		event.setRating(Rating.C14);
 		event.setTitle("  ");
