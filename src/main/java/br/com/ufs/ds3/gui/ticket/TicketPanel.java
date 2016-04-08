@@ -166,6 +166,7 @@ public class TicketPanel {
 			private JPanel createChairPanel(NumberedChairSession session) {
 				OccupationMap occupationMap = new SessionService().generateOccupationMap(session);
 				JPanel panel = new JPanel(new GridLayout(occupationMap.getRows(), occupationMap.getCols()));
+				panel.setName("chairPanel");
 				
 				for (ChairAvailability chairAvailability : occupationMap.getChairAvailabilities()) {
 					JCheckBox checkBox = new JCheckBox();
@@ -173,9 +174,9 @@ public class TicketPanel {
 					if (chairAvailability.getChairStatus() != ChairStatus.FREE) {
 						checkBox.setEnabled(false);
 					} else {
-						checkBox.addActionListener(new ActionListener() {
+						checkBox.addChangeListener(new ChangeListener() {
 							@Override
-							public void actionPerformed(ActionEvent e) {
+							public void stateChanged(ChangeEvent e) {
 								if (checkBox.isSelected()) {
 									spinnerInteira.setValue(((Integer) spinnerInteira.getValue()) + 1);
 									selectedChairs.add(chairAvailability);
@@ -201,6 +202,7 @@ public class TicketPanel {
 		});
 		
 		JButton persistButton = new JButton("Gravar");
+		persistButton.setName("buttonGravar");
 		ticketPanel.add(persistButton, "x2 (container.w+pref)/2");
 		persistButton.addActionListener(new ActionListener() {
 			@Override

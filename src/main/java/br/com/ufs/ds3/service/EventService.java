@@ -41,5 +41,11 @@ public class EventService {
 		if (event.getTheatre() == null) {
 			throw new TicketSalesException("O teatro do evento deve ser informado");
 		}
+		if (event.getStartDate() == null) {
+			throw new TicketSalesException("A data inicial do evento deve ser informada");
+		}
+		if (event.getEndDate() == null) {
+			throw new TicketSalesException("A data final do evento deve ser informada");
+		}
 	}
 }

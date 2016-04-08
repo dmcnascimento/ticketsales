@@ -9,6 +9,7 @@ import br.com.ufs.ds3.dao.SaleDao;
 import br.com.ufs.ds3.dao.TicketDao;
 import br.com.ufs.ds3.entity.PaidTicket;
 import br.com.ufs.ds3.entity.Sale;
+import br.com.ufs.ds3.exception.TicketSalesException;
 
 public class TicketService {
 	private TicketDao ticketDao;
@@ -20,6 +21,9 @@ public class TicketService {
 	}
 	
 	public void sellTickets(TicketSaleBean ticketSaleBean) {
+		if (ticketSaleBean.getFullPriceTickets().isEmpty() && ticketSaleBean.getHalfPriceTickets().isEmpty()) {
+			throw new TicketSalesException("A quantidade de ingressos deve ser maior do que 0");
+		}
 		BigDecimal total = calculatePrice(ticketSaleBean.getBasePrice(), ticketSaleBean.getFullPriceTickets().size(), ticketSaleBean.getHalfPriceTickets().size());
 		Sale sale = new Sale();
 		sale.setSaleDate(new Date());

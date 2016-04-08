@@ -58,4 +58,9 @@ public class DB {
 	public EntityManager createEntityManager() {
 		return entityManagerFactory.createEntityManager();
 	}
+	
+	public static void setPersistenceUnit(String persistenceUnitName) {
+		entityManagerFactory.close();
+		entityManagerFactory = Persistence.createEntityManagerFactory(persistenceUnitName);
+	}
 }

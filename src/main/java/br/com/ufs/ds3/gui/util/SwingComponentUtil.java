@@ -125,6 +125,7 @@ public class SwingComponentUtil {
 			throw new TicketSalesException("Componente desconhecido: " + componentType);
 		}
 		
+		component.setName(label);
 		parent.add(labelComponent);
 		parent.add(component, constraints);
 		return component;

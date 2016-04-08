@@ -51,6 +51,7 @@ public class EventPanel {
 		swingComponentUtil.setComboModelValues(ratingCombo, Rating.values());
 		
 		JButton persistButton = new JButton("Gravar");
+		persistButton.setName("buttonGravar");
 		eventPanel.add(persistButton, "x2 (container.w+pref)/2");
 		persistButton.addActionListener(new ActionListener() {
 			@Override
