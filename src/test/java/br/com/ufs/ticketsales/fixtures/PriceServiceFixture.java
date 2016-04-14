@@ -36,9 +36,9 @@ public class PriceServiceFixture {
 		Price price1 = new Price();
 		price1.setEvent(event);
 		price1.setWeekDay(WeekDay.FRI);
-		calendar.set(Calendar.HOUR_OF_DAY, 11);
+		calendar.set(Calendar.HOUR_OF_DAY, 10);
 		price1.setStartHour(calendar.getTime());
-		calendar.set(Calendar.HOUR_OF_DAY, 12);
+		calendar.set(Calendar.HOUR_OF_DAY, 11);
 		price1.setEndHour(calendar.getTime());
 		price1.setTicketPrice(new BigDecimal(1d));
 		

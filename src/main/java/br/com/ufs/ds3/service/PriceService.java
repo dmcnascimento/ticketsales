@@ -52,7 +52,7 @@ public class PriceService {
 			if (price.getStartHour().equals(p.getStartHour())) {
 				return true;
 			}
-			if (DateUtil.greaterOrEq(price.getEndHour(), p.getStartHour()) && DateUtil.lessOrEq(p.getEndHour(), price.getEndHour())) {
+			if (!(DateUtil.greaterOrEq(price.getEndHour(), p.getStartHour()) && DateUtil.lessOrEq(p.getEndHour(), price.getEndHour()))) {
 				return true;
 			}
 			return false;
