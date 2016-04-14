@@ -27,9 +27,17 @@ public class EventDao extends Dao<Event> {
 	
 	public List<Price> getPricesForEvent(Event event) {
 		EntityManager entityManager = db.createEntityManager();
-		List<Price> prices = entityManager.createQuery("select o from Price o where o.event = :event", Price	.class)
+		List<Price> prices = entityManager.createQuery("select o from Price o where o.event = :event", Price.class)
 				.setParameter("event", event).getResultList();
 		entityManager.close();
 		return prices;
+	}
+	
+	public Event getEventWithTitle(String eventTitle) {
+		EntityManager entityManager = db.createEntityManager();
+		Event event = entityManager.createQuery("select o from Event o where o.title = :title", Event.class)
+				.setParameter("title", eventTitle).getSingleResult();
+		entityManager.close();
+		return event;
 	}
 }
