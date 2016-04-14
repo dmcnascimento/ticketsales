@@ -38,10 +38,12 @@ public class EventPanelTest extends AssertJSwingJUnitTestCase {
 			@Override
 			protected void executeInEDT() throws Throwable {
 				Calendar calendar = Calendar.getInstance();
-				DateModel<Date> model = (DateModel<Date>) frameFixture.panel("Data inicial").targetCastedTo(JDatePickerImpl.class).getModel();
+				DateModel<Date> model = (DateModel<Date>) frameFixture.panel("Data inicial")
+						.targetCastedTo(JDatePickerImpl.class).getModel();
 				model.setValue(calendar.getTime());
 				calendar.add(Calendar.MONTH, 2);
-				model = (DateModel<Date>) frameFixture.panel("Data final").targetCastedTo(JDatePickerImpl.class).getModel();
+				model = (DateModel<Date>) frameFixture.panel("Data final")
+						.targetCastedTo(JDatePickerImpl.class).getModel();
 				model.setValue(calendar.getTime());
 			}
 		});
